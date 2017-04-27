@@ -42,7 +42,6 @@ namespace automotive {
         using namespace odcore::data::image;
         using namespace automotive;
         using namespace automotive::miniature;
-
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
         m_hasAttachedToSharedImageMemory(false),
         m_sharedImageMemory(),
@@ -120,7 +119,7 @@ namespace automotive {
             IplImage *gray = cvCreateImage(cvGetSize(m_image),IPL_DEPTH_8U,1);
             cvCvtColor(m_image,gray,CV_BGR2GRAY);
             cvSmooth(gray,gray, CV_BLUR, 3,3);
-            cvCanny(gray,gray, 50,200,3);
+            cvCanny(gray,gray, 50,150,3);
             cvMerge(gray,gray,gray, NULL, m_image);
 
             static bool useRightLaneMarking = true;
@@ -138,7 +137,7 @@ namespace automotive {
                 left.x = -1;
                 for(int x = m_image->width/2; x > 0; x--) {
                     pixelLeft = cvGet2D(m_image, y, x);
-                    if (pixelLeft.val[0] >= 200) {
+                    if (pixelLeft.val[0] >= 125) {
                         left.x = x;
                         break;
                     }
@@ -151,7 +150,7 @@ namespace automotive {
                 right.x = -1;
                 for(int x = m_image->width/2; x < m_image->width; x++) {
                     pixelRight = cvGet2D(m_image, y, x);
-                    if (pixelRight.val[0] >= 200) {
+                    if (pixelRight.val[0] >= 125) {
                         right.x = x;
                         break;
                     }
@@ -248,7 +247,7 @@ namespace automotive {
             //            const double Kd = 0;
 
             // The following values have been determined by Twiddle algorithm.
-            const double Kp = 1.0;
+            const double Kp = 1.5;
             const double Ki = 0.0;
             const double Kd = 0.01;
 
@@ -262,11 +261,11 @@ namespace automotive {
             if (fabs(e) > 1e-2) {
                 desiredSteering = y;
 
-                if (desiredSteering > 25.0) {
-                    desiredSteering = 25.0;
+                if (desiredSteering > 1.25) {
+                    desiredSteering = 1.25;
                 }
-                if (desiredSteering < -25.0) {
-                    desiredSteering = -25.0;
+                if (desiredSteering < -1.25) {
+                    desiredSteering = -1.25;
                 }
             }
             cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
@@ -294,7 +293,7 @@ namespace automotive {
             cvInitFont(&m_font, CV_FONT_HERSHEY_DUPLEX, hscale, vscale, shear, thickness, lineType);
 
             // Parameters for overtaking.
-            const int32_t ULTRASONIC_FRONT_CENTER = 3;
+            const int32_t ULTRASONIC_FRONT_CENTER = 1;
             const int32_t ULTRASONIC_FRONT_RIGHT = 4;
             const int32_t INFRARED_FRONT_RIGHT = 0;
             const int32_t INFRARED_REAR_RIGHT = 2;

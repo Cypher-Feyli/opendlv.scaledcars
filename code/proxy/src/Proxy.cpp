@@ -143,6 +143,8 @@ namespace automotive {
             // Share data.
             getConference().send(c);
         }
+
+        //tests atm new update coming now
         void ParseSensors::nextString(const string &s) {
             cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
             /*char* chr = strdup(s.c_str());
@@ -186,15 +188,9 @@ namespace automotive {
             std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
             ParseSensors handler;
             serial->setStringListener(&handler);
-            const uint32_t ONE_SECOND = 1000 * 1000;
-            odcore::base::Thread::usleepFor(ONE_SECOND);
 
             // Start receiving bytes.
             serial->start();
-            // Stop receiving bytes and unregister our handler.
-            //serial->stop();
-
-
 
             uint32_t captureCounter = 0;
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
@@ -206,47 +202,29 @@ namespace automotive {
                     distribute(c);
                     captureCounter++;
                 }
+                    Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
+                    VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
 
-                /*try {
-                  cerr << "SERIAL " << SERIAL_PORT << " BAUD " << BAUD_RATE << endl;
+                    //double speed = vehicleControlData.getSpeed(); 
+                    double Angle = vehicleControlData.getSteeringWheelAngle();
+                    // int speed1 = (int) speed;
 
-                  serial->send("Hello World\r\n");
-                  }
-                  catch(string &exception) {
-                  cerr << "Serial port could not be created: " << exception << endl;
-                  }
-                  const uint32_t ONE_SECOND = 1000 * 1000;
-                  odcore::base::Thread::usleepFor(ONE_SECOND);
-                  */
-                Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
-                VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
+                    int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
+                    std::string angleString = std::to_string(Angle1);
+                    /*if(speed1 < 0){ 
+                      serial->send("B," + angleString + "]");
+                      } */
 
-                //double speed = vehicleControlData.getSpeed(); 
-                double Angle = vehicleControlData.getSteeringWheelAngle();
-                // int speed1 = (int) speed;
+                    /*else if(Angle1 == 0){
+                      serial->send("S," + angleString + "]");
+                      } */
 
-                int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
-                std::string angleString = std::to_string(Angle1);
-                /*if(speed1 < 0){ 
-                  serial->send("B," + angleString + "]");
-                  } 
-
-                  if(speed1 == 0)){*/
-                //   serial->send("S," + angleString + "]");
-                /*} 
-                */
-                // else{
-                // negative or positive angles
-                if(Angle1 > -1){
-
-                serial->send("[F+" + angleString + "]");
-                }
-                else{
+                    //else{
+                    // negative or positive angles
+                    
                     serial->send("[F" + angleString + "]");
-                }
-                //}
+                    //}
             }
-
             cout << "Proxy: Captured " << captureCounter << " frames." << endl;
 
             serial->stop();
