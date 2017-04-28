@@ -70,45 +70,72 @@ namespace automotive {
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+        
 
                 // Create vehicle control data.
                 VehicleControl vc;
 
                 // Moving state machine.
                 if (stageMoving == 0) {
-                    // Go forward.
-                    vc.setSpeed(2);
+                    // Go forward.default speed 1
+                    vc.setSpeed(1);
                     vc.setSteeringWheelAngle(0);
                 }
-                if ((stageMoving > 0) && (stageMoving < 40)) {
-                    // Move slightly forward.
-                    vc.setSpeed(.4);
+                if ((stageMoving > 0) && (stageMoving < 10)) {
+                    // Move slightly forward.10 tics
+                    vc.setSpeed(1);
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if ((stageMoving >= 40) && (stageMoving < 45)) {
-                    // Stop.
+                if ((stageMoving >= 10) && (stageMoving < 15)) {
+                    // Stop.find the parking gap
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if ((stageMoving >= 45) && (stageMoving < 85)) {
+                if ((stageMoving >= 15) && (stageMoving < 70)) {
                     // Backwards, steering wheel to the right.
-                    vc.setSpeed(-1.6);
+                    vc.setSpeed(-1);
                     vc.setSteeringWheelAngle(25);
                     stageMoving++;
                 }
-                if ((stageMoving >= 85) && (stageMoving < 220)) {
+                if ((stageMoving >= 70) && (stageMoving < 100)) {
                     // Backwards, steering wheel to the left.
-                    vc.setSpeed(-.175);
+                    vc.setSpeed(-1);
                     vc.setSteeringWheelAngle(-25);
                     stageMoving++;
                 }
-                if (stageMoving >= 220) {
+                if ((stageMoving >= 100) && (stageMoving < 105)) {
+                    // turn left to straight up
+                    vc.setSpeed(0);
+                    vc.setSteeringWheelAngle(-25);
+                    stageMoving++;
+                }
+                  if ((stageMoving >= 105) && (stageMoving < 127)) {
+                    //  turn right to straight up.
+                    vc.setSpeed(1);
+                    vc.setSteeringWheelAngle(10);
+                    stageMoving++;
+
+
+
+                }
+                                   
+                if (stageMoving >= 128) {
                     // Stop.
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
+                    
+                    
+                    
+                   
+                
+               
+                    
+                   
                 }
+
+
 
                 // Measuring state machine.
                 switch (stageMeasuring) {
@@ -121,13 +148,17 @@ namespace automotive {
                     break;
                     case 1:
                         {
-                            // Checking for sequence +, -.
+                            // Checking for sequence +, -. US does not obstacle ,start value for sensor is -1.
                             if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) < 0)) {
                                 // Found sequence +, -.
+                                   // cerr << "Value = " << sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) << endl;
                                 stageMeasuring = 2;
+                                //find start of gap
+
                                 absPathStart = vd.getAbsTraveledPath();
                             }
                             distanceOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
+                            
                         }
                     break;
                     case 2:
@@ -136,13 +167,18 @@ namespace automotive {
                             if ((distanceOld < 0) && (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) > 0)) {
                                 // Found sequence -, +.
                                 stageMeasuring = 1;
+                                // find end of gap   US find obstacle ,value bigger than 0.
+
                                 absPathEnd = vd.getAbsTraveledPath();
+                              
 
                                 const double GAP_SIZE = (absPathEnd - absPathStart);
-
+                                 
                                 cerr << "Size = " << GAP_SIZE << endl;
 
-                                if ((stageMoving < 1) && (GAP_SIZE > 7)) {
+                                                          //set parking gap 
+                                if ((stageMoving < 1) && (GAP_SIZE > 10)) {
+                                    
                                     stageMoving = 1;
                                 }
                             }
