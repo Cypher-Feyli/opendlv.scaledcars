@@ -21,7 +21,7 @@
 #include <cstring>
 #include <cmath>
 #include <iostream>
-
+#include "DataParser.h"
 #include "opendavinci/odcore/base/KeyValueConfiguration.h"
 #include "opendavinci/odcore/data/Container.h"
 #include "opendavinci/odcore/data/TimeStamp.h"
@@ -47,7 +47,6 @@ using namespace odcore::wrapper;
 #ifdef HAVE_UEYE
 #include "uEyeCamera.h"
 #endif
-#include "ParseSensors.h"
 
 #include "Proxy.h"
 
@@ -60,9 +59,6 @@ namespace automotive {
         using namespace odtools::recorder;
         string SERIAL_PORT;
         uint32_t BAUD_RATE;
-        char myStr[33];
-        bool add = false;
-        unsigned int i = 0;
         Proxy::Proxy(const int32_t &argc, char **argv) :
             TimeTriggeredConferenceClientModule(argc, argv, "proxy"),
             m_recorder(),
@@ -144,53 +140,17 @@ namespace automotive {
             getConference().send(c);
         }
 
-        //tests atm new update coming now
-        void ParseSensors::nextString(const string &s) {
-            cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
-            /*char* chr = strdup(s.c_str());
-              for(unsigned int p = 0; p < s.length(); p++){
-              if(s.length() > 11){
-              break;
-              }
-              if(chr[i] == "["){
-              add = true;
-              }
-              if(chr[i] == "]" && add){ 
-              cerr << " READY STRING " << myStr << endl;
-              */
-            SendString(myStr);
-            i = 0;/*
-                     add = false;
-                     }
-                     if(add){
-                     myStr[i] = chr[p];   
-                     i++;
-                     }
-                     }*/
-        }
-
-        void ParseSensors::SendString(const char chararr[]){
-            cerr  << chararr[0] << " senddd" << endl;
-            /* cerr << " ready send " << sendvalues << endl;
-               SensorBoardData sbd(sensors, sendvalues); // Pack and send SBD
-               Container csbd(sbd);
-               getConference().send(csbd);
-               VehicleData vehicleData; // Pack and send VD
-               vehicleData.setAbsTraveledPath((handler.getDist()));
-               Container cvd(vd);
-               getConference().send(cvd);*/
-        }
-
-
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Proxy::body() {
 
             std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
-            ParseSensors handler;
+            DataParser handler;
             serial->setStringListener(&handler);
 
             // Start receiving bytes.
             serial->start();
+            //const uint32_t ONE_SECOND = 1000 * 1000;
+            //odcore::base::Thread::usleepFor(10 * ONE_SECOND);
 
             uint32_t captureCounter = 0;
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
@@ -202,28 +162,39 @@ namespace automotive {
                     distribute(c);
                     captureCounter++;
                 }
-                    Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
-                    VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
+                if(handler.DataDone())
+                {   //cerr << handler.GetValues().find("IRFR")->second << endl;
+                    //SensorBoardData sbd(5, handler.GetValues());
+                    //Container csbd(sbd);
+                    //getConference().send(csbd);
+                    //VehicleData vehicleData; 
+                    //vehicleData.setAbsTraveledPath();
+                    //Container cvd(vd);
+                    //getConference().send(cvd);*/
+                }
 
-                    //double speed = vehicleControlData.getSpeed(); 
-                    double Angle = vehicleControlData.getSteeringWheelAngle();
-                    // int speed1 = (int) speed;
+                Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
+                VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
 
-                    int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
-                    std::string angleString = std::to_string(Angle1);
-                    /*if(speed1 < 0){ 
-                      serial->send("B," + angleString + "]");
-                      } */
+                //double speed = vehicleControlData.getSpeed(); 
+                double Angle = vehicleControlData.getSteeringWheelAngle();
+                // int speed1 = (int) speed;
 
-                    /*else if(Angle1 == 0){
-                      serial->send("S," + angleString + "]");
-                      } */
+                int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
+                std::string angleString = std::to_string(Angle1);
+                /*if(speed1 < 0){ 
+                  serial->send("B," + angleString + "]");
+                  } */
 
-                    //else{
-                    // negative or positive angles
-                    
-                    serial->send("[F" + angleString + "]");
-                    //}
+                /*else if(Angle1 == 0){
+                  serial->send("S," + angleString + "]");
+                  } */
+
+                //else{
+                // negative or positive angles
+
+                serial->send("[F" + angleString + "]");
+                //}
             }
             cout << "Proxy: Captured " << captureCounter << " frames." << endl;
 
