@@ -92,6 +92,8 @@ namespace automotive {
             }
         }
 
+       
+
         void LaneFollower::tearDown() {
             // This method will be call automatically _after_ return from body().
             if (m_image != NULL) {
@@ -142,7 +144,11 @@ namespace automotive {
             return retVal;
         }
      
+//void LaneFollower::detectWhite() {
 
+        // int setSpeed(double error, int previous speed){
+     //   if(error)
+ //   }
 
   
   
@@ -185,7 +191,7 @@ namespace automotive {
                   for(int x = (m_image->width/2); x > 0; x--) {
                   // here we get the pixel value at location y,x in the matrix m_image
                     pixelLeft = cvGet2D(m_image, y, x);
-                            // when finding a non black pixel or pixel that contains red, break the loop and store the x value
+                            // when finding a non black pixel or pixel that contains red, break the loop and store the x value which is the vertical pixel location 
                     if (pixelLeft.val[0] >= 200) {
                         left.x = x;
                         break;
@@ -295,11 +301,11 @@ namespace automotive {
             if (fabs(e) > 1e-2) {
                 desiredSteering = y;
 
-                if (desiredSteering > 25.0) {
-                    desiredSteering = 25.0;
+                if (desiredSteering > 0.6) {
+                    desiredSteering = 0.6;
                 }
-                if (desiredSteering < -25.0) {
-                    desiredSteering = -25.0;
+                if (desiredSteering < -0.6) {
+                    desiredSteering = -0.6;
                 }
             }
             cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
@@ -324,7 +330,7 @@ namespace automotive {
                     //bool passed = false;
 
                     // Moving state machine.
-                    if (stageMoving == FORWARD) {
+                   if (stageMoving == FORWARD) {
                         // Use m_vehicleControl data from image processing.
 
                         stageToRightLaneLeftTurn = 0;
@@ -337,15 +343,13 @@ namespace automotive {
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR;
-                        
 
                         stageToRightLaneRightTurn++;
-                    
                     }
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(25);
+                        m_vehicleControl.setSpeed(2);
+                        m_vehicleControl.setSteeringWheelAngle(0.4);
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
@@ -362,8 +366,12 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
-                        m_vehicleControl.setSpeed(1.0);
-                        m_vehicleControl.setSteeringWheelAngle(5);
+                        m_vehicleControl.setSpeed(1.5);
+                        m_vehicleControl.setSteeringWheelAngle(0);
+                        stageMoving = FORWARD;
+                        stageMeasuring = FIND_OBJECT_INIT;
+                        m_eSum = 0;
+                            m_eOld = 0;
 
                         stageToRightLaneRightTurn--;
                         if (stageToRightLaneRightTurn == 0) {
@@ -372,10 +380,12 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part.
-                        m_vehicleControl.setSpeed(.9);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
-
-                        stageToRightLaneLeftTurn--;
+                        
+                        
+                        m_vehicleControl.setSpeed(2);
+                        m_vehicleControl.setSteeringWheelAngle(5);
+                     
+                        stageToRightLaneLeftTurn = 0;
                         if (stageToRightLaneLeftTurn == 0) {
                             // Start over.
                             stageMoving = FORWARD;
@@ -400,7 +410,7 @@ namespace automotive {
 
                         // Approaching an obstacle (stationary or driving slower than us).
                         if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
-                            // Check if overtaking shall be started.
+                            // Check if overtaking shall be started.                        
                             stageMeasuring = FIND_OBJECT_PLAUSIBLE;
                         }
 
@@ -437,32 +447,21 @@ namespace automotive {
                             // Reset PID controller.
                             m_eSum = 0;
                             m_eOld = 0;
-                           
                         }
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
                         // Find end of object.
                         distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
 
-                        if (distanceToObstacle < 0 ) {
+                        if (distanceToObstacle < 0) {
                             // Move to right lane again.
-                           // stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
-                            // m_vehicleControl.setSpeed(.9);
-                     //   m_vehicleControl.setSteeringWheelAngle(-25);
-
+                            stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
 
                             // Disable measuring until requested from moving state machine again.
-                            stageMoving= TO_RIGHT_LANE_LEFT_TURN;
-                        }else{
-                     
-                        stageMeasuring = DISABLE;
-
+                            stageMeasuring = DISABLE;
                         }
-                        m_vehicleControl.setSpeed(.9);
-                        m_vehicleControl.setSteeringWheelAngle(-25);
                     }
-                }
-
+}
         // This method will do the main data processing job.
         // Therefore, it tries to open the real camera first. If that fails, the virtual camera images from camgen are used.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
