@@ -14,9 +14,11 @@ using namespace std;
                
             virtual bool DataDone();
            
-            virtual map<string, int> GetValues();
+            virtual map<uint32_t, double> GetValues();
             
             virtual void nextString(const std::string &s);
+            
+            virtual void Reset();
 
            private:
              

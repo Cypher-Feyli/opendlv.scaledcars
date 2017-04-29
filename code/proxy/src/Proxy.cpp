@@ -163,10 +163,20 @@ namespace automotive {
                     captureCounter++;
                 }
                 if(handler.DataDone())
-                {   //cerr << handler.GetValues().find("IRFR")->second << endl;
-                    //SensorBoardData sbd(5, handler.GetValues());
-                    //Container csbd(sbd);
-                    //getConference().send(csbd);
+
+
+                {   
+
+                    //TODO WHAT IS THE ORDER?
+                    //test reading SBD
+                    //uint32_t one = 1;
+                    //cerr << (handler.GetValues().find(one)->second) << endl;
+                    uint32_t sens = 4;
+                    
+                    SensorBoardData sbd(sens, handler.GetValues());
+                    Container csbd(sbd);
+                    getConference().send(csbd);
+                    handler.Reset();
                     //VehicleData vehicleData; 
                     //vehicleData.setAbsTraveledPath();
                     //Container cvd(vd);

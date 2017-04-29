@@ -14,13 +14,14 @@ bool done = false;
 char delim1 = '[';
 char delim2 = ']';
 string dataValues = "";
-map<string, int> mapValues;
+uint32_t i=0;
+map<uint32_t, double> mapValues;
 // Your class needs to implement the method void nextString(const std::string &s).
 void DataParser::PackageData(const string vals){
     if(vals.at(0) == 'U'){
         int FirstDelim = vals.find(".");
         //mapValues.insert(pair<string,int>("USFR",stoi(vals.substr(FirstDelim+1,secondDelim))));
-        mapValues.insert ( pair<string,int>("USFC",stoi(vals.substr(FirstDelim+1))));
+        mapValues.insert ( pair<uint32_t,double>((i+3),stod(vals.substr(FirstDelim+1))));
         Data++;
     }
     else if(vals.at(0) == 'I'){
@@ -28,9 +29,9 @@ void DataParser::PackageData(const string vals){
         int secondDelim = vals.find(",");
         int ThirdDelim = vals.find(";");
 
-        mapValues.insert(pair<string,int>("IRFR",stoi(vals.substr(FirstDelim+1,secondDelim))));
-        mapValues.insert( pair<string,int>("IRBR",stoi(vals.substr(secondDelim+1,ThirdDelim))));
-        mapValues.insert( pair<string,int>("IRB",stoi(vals.substr(ThirdDelim+1))));
+        mapValues.insert(pair<uint32_t,double>((i),stod(vals.substr(FirstDelim+1,secondDelim))));
+        mapValues.insert( pair<uint32_t,double>((i+1),stod(vals.substr(secondDelim+1,ThirdDelim))));
+        mapValues.insert( pair<uint32_t,double>((i+2),stod(vals.substr(ThirdDelim+1))));
         Data++;
     }
     if(Data == 2){
@@ -57,16 +58,13 @@ void DataParser::nextString(const string &s) {
 }
 
 bool DataParser::DataDone(){
+    return done;
+}
+map<uint32_t, double> DataParser::GetValues(){
+    return mapValues;
+}
+void DataParser::Reset(){
     mapValues.clear();
     Data = 0;
-    if(done){
-        done = false;
-        return true;
-    }
-    else{
-        return done;
-    }
-}
-map<string, int> DataParser::GetValues(){
-    return mapValues;
+    done = false;
 }
