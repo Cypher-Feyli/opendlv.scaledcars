@@ -5,7 +5,25 @@ byte inByte;   // Where to store the Bytes read
 
 //Included Libraries
 #include <Servo.h>
+#include <Wire.h>
+#include <Smartcar.h>
+#include "RunningMedian.h"
 
+RunningMedian IRB = RunningMedian(5);
+RunningMedian IRBR = RunningMedian(5);
+RunningMedian IRFR = RunningMedian(5);
+RunningMedian USFR = RunningMedian(5);
+RunningMedian USFC = RunningMedian(5);
+
+long counter = 0;
+
+const unsigned short GAIN = 0; //maximum gain
+const unsigned short RANGE = 23; //7 for 34 centimeters
+SRF08 front;
+SRF08 frontRight;
+GP2D120 FrontRight;
+GP2D120 BackRight;
+GP2D120 Back;
 // Define Variables:
 const int ChannelA = 6;
 const int ChannelB = 9;
@@ -27,6 +45,8 @@ int posofstart = 0;
 int Degrees;
 int Speed;
 const int numReadings = 7;
+int currRead = 0;
+
 int pi = 3.14159265359;
 Servo myServo, CarMotor;  //Steering Servo
 
@@ -35,10 +55,24 @@ void setup()
 {
   pinMode(ChannelA , INPUT);
   pinMode(ChannelB , INPUT);
+  FrontRight.attach(A5);
+  BackRight.attach(A4);
+  Back.attach(A3);
+  
+  front.attach(112);
+  //front.setGain(GAIN);
+  //front.setRange(RANGE);
+  //front.setPingDelay(70); 
+  /*frontRight.attach(113);
+  frontRight.setGain(GAIN);
+  frontRight.setRange(RANGE);
+  frontRight.setPingDelay(70); //uncomment if u want to use custom measurement range
+*/
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
-  inputString.reserve(50000);
+  inputString.reserve(25000);
   Serial.begin(115200);
+
 }
 //Main Program
 void loop()
@@ -51,7 +85,7 @@ void loop()
     inputString = "";
     stringComplete = false;
     }
-//    NormalizeSensValues();
+    NormalizeSensValues();
   }
   else {
     b = true;
@@ -68,7 +102,7 @@ void handleInput() { //handle serial input if there is any
   posofstart = inputString.indexOf("[");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart);
-  Serial.println(angle);
+  //Serial.println(angle);
   if(angle < 60){
     angle = 60;
   }
@@ -77,7 +111,7 @@ void handleInput() { //handle serial input if there is any
   }
     switch (dir[0]) {
       case 'F': //rotate counter-clockwise going forward
-        CarMotor.writeMicroseconds(1555);
+        CarMotor.writeMicroseconds(1554);
         myServo.write(angle);
         break;
       case 'S'://stop car
@@ -195,4 +229,28 @@ void SteerCar() {
   myServo.write(Degrees);
   CarMotor.writeMicroseconds(Speed);
 
+}
+
+
+void NormalizeSensValues() {
+  //school testing
+  Serial.println("[IR.22,44;66]");
+  Serial.println("[US.33]");
+  /*delay(100);
+  IRFR.add(FrontRight.getDistance());
+  IRBR.add(Back.getDistance());
+  IRB.add(BackRight.getDistance());
+  //USFR.add(frontRight.getDistance());
+  USFC.add(front.getDistance());
+  counter++;
+  if(counter == 5){
+  counter = 0;
+  String FrontRightIR = String(int(IRFR.getMedian()));
+  String BackIR = String(int(IRBR.getMedian()));
+  String BackRightIR = String(int(IRB.getMedian()));
+  //String usFrontRight = String(int(USFR.getMedian()));
+  String usFront = String(int(USFC.getMedian()));
+  Serial.println("[IR" + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
+  Serial.println("[US" + usFront + "]");
+  }*/
 }
