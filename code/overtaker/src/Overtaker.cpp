@@ -120,8 +120,7 @@ namespace automotive {
                         // Move to the left lane: Passing stage.
 
                         // Use m_vehicleControl data from image processing.
-                    	m_vehicleControl.setSpeed(2);
-                        m_vehicleControl.setSteeringWheelAngle(35);
+                    	
                         // Find end of object.
                         stageMeasuring = END_OF_OBJECT;
                     }
