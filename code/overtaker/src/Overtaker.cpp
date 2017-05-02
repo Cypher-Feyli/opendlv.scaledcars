@@ -155,8 +155,8 @@ namespace automotive {
                             distanceToObstacleOld = 0;
 
                             // Reset PID controller.
-                            m_eSum = 0;
-                            m_eOld = 0;
+                           // m_eSum = 0;
+                            //m_eOld = 0;
                         }
                     }
 
@@ -221,7 +221,7 @@ namespace automotive {
                             stageMeasuring = DISABLE;
                         }
                     }
-}
+
                 // Create container for finally sending the data.
                 Container c(vc);
                 // Send container.
