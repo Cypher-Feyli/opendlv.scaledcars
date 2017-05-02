@@ -97,8 +97,8 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part until both IRs see something.
-                        m_vehicleControl.setSpeed(1);
-                        m_vehicleControl.setSteeringWheelAngle(-35);
+                        vc.setSpeed(1);
+                        vc.setSteeringWheelAngle(-35);
                          //useRightLaneMarking = true;
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
@@ -108,8 +108,8 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
-                        m_vehicleControl.setSpeed(.6);
-                        m_vehicleControl.setSteeringWheelAngle(35);
+                        vc.setSpeed(.6);
+                        vc.setSteeringWheelAngle(35);
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
@@ -126,8 +126,8 @@ namespace automotive {
                     }
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
-                        m_vehicleControl.setSpeed(1.3);
-                        m_vehicleControl.setSteeringWheelAngle(-35);
+                        vc.setSpeed(1.3);
+                        vc.setSteeringWheelAngle(-35);
                         //stageMoving = FORWARD;
                         //stageMeasuring = FIND_OBJECT_INIT;
                        // m_eSum = 0;
@@ -142,8 +142,8 @@ namespace automotive {
                         // Move to the left lane: Turn left part.
                         
                         
-                        m_vehicleControl.setSpeed(2);
-                        m_vehicleControl.setSteeringWheelAngle(-35);
+                        vc.setSpeed(2);
+                        vc.setSteeringWheelAngle(-35);
                      
                         stageToRightLaneLeftTurn = 0;
                         if (stageToRightLaneLeftTurn == 0) {
