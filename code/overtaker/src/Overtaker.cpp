@@ -205,8 +205,8 @@ namespace automotive {
                             stageMoving = CONTINUE_ON_LEFT_LANE;
 
                             // Reset PID controller.
-                            m_eSum = 0;
-                            m_eOld = 0;
+                          //  m_eSum = 0;
+                           // m_eOld = 0;
                         }
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
