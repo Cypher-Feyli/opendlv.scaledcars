@@ -186,12 +186,12 @@ namespace automotive {
                 Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
                 VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
 
-                //double speed = vehicleControlData.getSpeed(); 
-                double Angle = vehicleControlData.getSteeringWheelAngle();
-                // int speed1 = (int) speed;
-
-                int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
-                std::string angleString = std::to_string(Angle1);
+                //pid radians gotten from vehiclecontroll container
+                double Radians = vehicleControlData.getSteeringWheelAngle();
+                
+                // convert the radians to degrees to send to the arduino
+                int degree = (int) (Radians *360)/(2* 3.1415926535); // Cast angle to int
+                std::string angleString = std::to_string(degree);
                 /*if(speed1 < 0){ 
                   serial->send("B," + angleString + "]");
                   } */
