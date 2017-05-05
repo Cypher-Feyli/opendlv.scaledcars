@@ -111,7 +111,7 @@ namespace automotive {
                     vc.setSteeringWheelAngle(-25);
                     stageMoving++;
                 }
-                  if ((stageMoving >= 105) && (stageMoving < 127)) {
+                  if ((stageMoving >= 105) && (stageMoving < 130)) {
                     //  turn right to straight up.
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(10);
@@ -120,8 +120,8 @@ namespace automotive {
 
 
                 }
-                                   
-                if (stageMoving >= 128) {
+                                  //128 
+                if (stageMoving >= 130) {
                     // Stop.
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
