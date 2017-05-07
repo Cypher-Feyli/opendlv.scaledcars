@@ -19,6 +19,8 @@ using namespace std;
             virtual void nextString(const std::string &s);
             
             virtual void Reset();
+            
+            virtual bool Handshake();
 
            private:
              

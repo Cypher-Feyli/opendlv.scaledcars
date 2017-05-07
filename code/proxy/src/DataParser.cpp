@@ -11,6 +11,7 @@ int Data = 0;
 using namespace std;
 bool add = false;
 bool done = false;
+bool handshake = false;
 char delim1 = '[';
 char delim2 = ']';
 string dataValues = "";
@@ -34,13 +35,17 @@ void DataParser::PackageData(const string vals){
         mapValues.insert( pair<uint32_t,double>((i+2),stod(vals.substr(ThirdDelim+1))));
         Data++;
     }
+    else if(vals.at(0) == 'H'){
+        cerr << "Hand shook" << endl;
+        handshake = true;        
+    }
     if(Data == 2){
         done = true;
     }
 }
 //tests atm new update coming now
 void DataParser::nextString(const string &s) {
-    // cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
+    cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
     char* chr = strdup(s.c_str());
     for(unsigned int p = 0; p < s.length(); p++){
         if(chr[p] == delim2 && add){
@@ -62,6 +67,9 @@ bool DataParser::DataDone(){
 }
 map<uint32_t, double> DataParser::GetValues(){
     return mapValues;
+}
+bool DataParser::Handshake(){
+    return handshake;
 }
 void DataParser::Reset(){
     mapValues.clear();
