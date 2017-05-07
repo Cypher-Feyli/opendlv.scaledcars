@@ -39,8 +39,8 @@ services:
         environment:
         - DISPLAY=$DISPLAY
         devices:
-            - "/dev/ttyACM1:/dev/ttyACM0"
-            - "/dev/video0:/dev/video0"
+            - "/dev/ttyACM0:/dev/ttyACM0"
+            - "/dev/video1:/dev/video0"
         depends_on:
             - odsupercomponent
         command: "/opt/opendlv.scaledcars/bin/miniature/proxy -rm=true --privileged=true --verbose=1 --cid=${CID} --freq=20"

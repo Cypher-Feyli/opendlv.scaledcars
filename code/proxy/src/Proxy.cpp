@@ -186,7 +186,7 @@ namespace automotive {
                 Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
                 VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
 
-                double speed = vehicleControlData.getSpeed(); 
+                //double speed = vehicleControlData.getSpeed(); 
                 double Angle = vehicleControlData.getSteeringWheelAngle();
                 // int speed1 = (int) speed;
 
