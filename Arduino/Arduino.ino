@@ -35,7 +35,7 @@ GP2D120 Back;
 // Define Variables:
 const int ChannelA = 6;
 const int ChannelB = 9;
-
+bool delay1 = true;
 //Signal Conditioning limits
 const int lo = 800;
 const int hi = 2000;
@@ -89,10 +89,11 @@ void setup()
   encoder.attach(encoderPin);
 //  encoder.attach(encoderPin, 12, HIGH);
   inputString.reserve(25000);
+  frontRight.attach(113);
+
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
   }
-  //frontRight.attach(113);
   encoder.begin(); // begin measurement HERE
   establishContact();
 }
@@ -124,7 +125,7 @@ void handleInput() { //handle serial input if there is any
   posofstart = inputString.indexOf("[");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart);
-  Serial.println(angle);
+    delay(20);
   if(angle < 60){
     angle = 60;
   }
@@ -271,7 +272,7 @@ void NormalizeSensValues() {
   IRFR.add(FrontRight.getDistance());
   IRBR.add(Back.getDistance());
   IRB.add(BackRight.getDistance());
-  //USFR.add(float(frontRight.getDistance()));
+  USFR.add(frontRight.getDistance());
   traveledDistance = String(encoder.getDistance()); 
   Serial.println("[V." + traveledDistance + "]");
 
@@ -281,19 +282,19 @@ void NormalizeSensValues() {
   FrontRightIR = String(IRFR.getMedian());
   BackIR = String(IRBR.getMedian());
   BackRightIR = String(IRB.getMedian());
-  //usFrontRight = String(USFR.getMedian());
+  usFrontRight = String(USFR.getMedian());
   //usFront = String(USFC.getMedian());
   IRFR.clear();
   IRBR.clear();
   IRB.clear();
   //USFC.clear();
-  //USFR.clear();
+  USFR.clear();
   //get distance traveled since begin() in setup()
 
   //Serial.println("[IR.22,44;66]");
   //  Serial.println("[US.33]");
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
-  //Serial.println("[US" + usFrontRight + "]");
+  Serial.println("[US." + usFrontRight + "]");
   counter = 0;
 
   }
