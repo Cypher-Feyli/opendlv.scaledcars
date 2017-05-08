@@ -23,6 +23,8 @@ String usFrontRight = "";
 
 long counter = 0;
 
+String traveledDistance = "";
+
 const unsigned short GAIN =  0x09; //maximum gain
 const unsigned short RANGE =  0x8C; //7 for 34 centimeters
 SRF08 front;
@@ -53,9 +55,16 @@ int Speed;
 const int numReadings = 7;
 int currRead = 0;
 
+Odometer encoder(14);
+const int encoderPin = 2;
+
 int pi = 3.14159265359;
 Servo myServo, CarMotor;  //Steering Servo
 
+//http://playground.arduino.cc/Main/RotaryEncoders
+//Odometer guides
+//https://github.com/platisd/smartcar_shield/wiki/API-documentation#void-beginodometer-encoder
+//
 // the setup routine runs once when you press reset:
 void setup()
 {
@@ -77,11 +86,14 @@ void setup()
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
   Serial.begin(115200);
+  encoder.attach(encoderPin);
+//  encoder.attach(encoderPin, 12, HIGH);
   inputString.reserve(25000);
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
   }
   //frontRight.attach(113);
+  encoder.begin(); // begin measurement HERE
   establishContact();
 }
 //Main Program
@@ -112,7 +124,7 @@ void handleInput() { //handle serial input if there is any
   posofstart = inputString.indexOf("[");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart);
-  //Serial.println(angle);
+  Serial.println(angle);
   if(angle < 60){
     angle = 60;
   }
@@ -122,6 +134,10 @@ void handleInput() { //handle serial input if there is any
     switch (dir[0]) {
       case 'F': //rotate counter-clockwise going forward
         CarMotor.writeMicroseconds(1554);
+        myServo.write(angle);
+        break;
+      case 'K': //rotate counter-clockwise going forward
+        CarMotor.writeMicroseconds(1553);
         myServo.write(angle);
         break;
       case 'S'://stop car
@@ -256,6 +272,8 @@ void NormalizeSensValues() {
   IRBR.add(Back.getDistance());
   IRB.add(BackRight.getDistance());
   //USFR.add(float(frontRight.getDistance()));
+  traveledDistance = String(encoder.getDistance()); 
+  Serial.println("[V." + traveledDistance + "]");
 
   //USFC.add(front.getDistance());
   counter++;
@@ -270,6 +288,7 @@ void NormalizeSensValues() {
   IRB.clear();
   //USFC.clear();
   //USFR.clear();
+  //get distance traveled since begin() in setup()
 
   //Serial.println("[IR.22,44;66]");
   //  Serial.println("[US.33]");
