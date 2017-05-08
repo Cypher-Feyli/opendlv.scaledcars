@@ -171,7 +171,7 @@ namespace automotive {
                 };
                 uint32_t sensors=0;
 
-                if(captureCounter > 60){
+                if(captureCounter > 200){
                     if(handler.DataDoneSBD()){  
                         //test printing all values from sensorboard
                         map<uint32_t, double> m = handler.GetValuesSBD();

@@ -49,13 +49,13 @@ void DataParser::PackageData(const string vals){
         cerr << "Hand shook" << endl;
         handshake = true;        
     }
-    if(usvals && irvals){
+    if(usvals  && irvals){
         done = true;
     }
 }
 //tests atm new update coming now
 void DataParser::nextString(const string &s) {
-    cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
+    //cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
     char* chr = strdup(s.c_str());
     for(unsigned int p = 0; p < s.length(); p++){
         if(chr[p] == delim2 && add){
