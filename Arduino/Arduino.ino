@@ -100,6 +100,7 @@ void setup()
 //Main Program
 void loop()
 {
+  delay(25);
   int a = pulseIn(ChannelB, HIGH, 35000);
   if (a < 700) {
     a = true;
@@ -125,7 +126,6 @@ void handleInput() { //handle serial input if there is any
   posofstart = inputString.indexOf("[");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart);
-    delay(20);
   if(angle < 60){
     angle = 60;
   }
