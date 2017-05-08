@@ -165,64 +165,58 @@ namespace automotive {
                     distribute(c);
                     captureCounter++;
                 }
+                while(!handler.Handshake()){
+                    cerr << "initializing handshake" << endl;
+                    odcore::base::Thread::usleepFor(10 * TENTH_SECOND);
+                };
+                uint32_t sensors=0;
+
                 if(captureCounter > 60){
-                    while(!handler.Handshake()){
-                        cerr << "initializing handshake" << endl;
-                        odcore::base::Thread::usleepFor(10 * TENTH_SECOND);
-                    };
-
-
-                    if(handler.DataDone())
-
-                    {  
-                        map<uint32_t, double> m = handler.GetValues();
+                    if(handler.DataDoneSBD()){  
+                        //test printing all values from sensorboard
+                        map<uint32_t, double> m = handler.GetValuesSBD();
                         for (const auto &p : m) {
                             std::cout << "m[" << p.first << "] = " << p.second << '\n';
                         }
-                        handler.Reset();
-                        //TODO WHAT IS THE ORDER?
-                        //test reading SBD
-                        //uint32_t one = 1;
-                        //cerr << (handler.GetValues().find(one)->second) << endl;
-                        //uint32_t sens = 4;
-
-                        //SensorBoardData sbd(sens, handler.GetValues());
-                        //Container csbd(sbd);
-                        //getConference().send(csbd);
-                        //handler.Reset();
-                        //VehicleData vehicleData; 
-                        //vehicleData.setAbsTraveledPath();
-                        //Container cvd(vd);
-                        //getConference().send(cvd);*/
+                        SensorBoardData sbd(sensors, handler.GetValuesSBD());
+                        Container csbd(sbd);
+                        getConference().send(csbd);
+                        handler.ResetSBD();
+                    }
+                    if(handler.DataDoneVD()){
+                        cerr << handler.GetValuesVD() << endl;
+                        VehicleData vehicleData; 
+                        vehicleData.setAbsTraveledPath(handler.GetValuesVD());
+                        Container cvd(vehicleData);
+                        getConference().send(cvd);
+                        handler.ResetVD();
                     }
                     //odcore::base::Thread::usleepFor(100 * HUNDRED_SECOND);
 
                     Container vehicleControlContainer = getKeyValueDataStore().get(automotive::VehicleControl::ID());
                     VehicleControl vehicleControlData = vehicleControlContainer.getData<VehicleControl> ();
 
-                    //double speed = vehicleControlData.getSpeed(); 
+                    double speed = vehicleControlData.getSpeed(); 
                     double Angle = vehicleControlData.getSteeringWheelAngle();
-                    // int speed1 = (int) speed;
+                    int speed1 = (int) speed;
 
                     int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
                     std::string angleString = std::to_string(Angle1);
-                    /*if(speed1 < 0){ 
-                      serial->send("B," + angleString + "]");
-                      } */
-
-                    /*else if(Angle1 == 0){
-                      serial->send("S," + angleString + "]");
-                      } */
-
-                    //else{
-                    // negative or positive angles
-
-                    serial->send("[F" + angleString + "]");
-                    //}
+                    if(speed1 >= 1){ 
+                        serial->send("F," + angleString + "]");
+                    }
+                    if(speed < 1 && speed > 0){
+                        serial->send("K," + angleString + "]");
+                    }
+                    else if(Angle1 == 0){
+                        serial->send("S," + angleString + "]");
+                    }
+                    else if(speed1 < 0){
+                        serial->send("B," + angleString + "]");
+                    }
                 }
             }
             cout << "Proxy: Captured " << captureCounter << " frames." << endl;
-            cerr << "Herewqeweqweqweqweqweqweqwe" << endl;
             serial->stop();
             serial->setStringListener(NULL);
 

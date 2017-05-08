@@ -12,13 +12,19 @@ using namespace std;
           
             virtual void PackageData(const std::string s);
                
-            virtual bool DataDone();
+            virtual bool DataDoneVD();
            
-            virtual map<uint32_t, double> GetValues();
+            virtual bool DataDoneSBD();
+
+            virtual map<uint32_t, double> GetValuesSBD();
+
+            virtual double GetValuesVD();
             
             virtual void nextString(const std::string &s);
             
-            virtual void Reset();
+            virtual void ResetSBD();
+            
+            virtual void ResetVD();
             
             virtual bool Handshake();
 
