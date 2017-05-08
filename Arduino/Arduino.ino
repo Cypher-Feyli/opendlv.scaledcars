@@ -15,10 +15,16 @@ RunningMedian IRFR = RunningMedian(5);
 RunningMedian USFR = RunningMedian(5);
 RunningMedian USFC = RunningMedian(5);
 
+String FrontRightIR = "";
+String BackIR = "";
+String BackRightIR = "";
+String usFront = "";
+String usFrontRight = "";
+
 long counter = 0;
 
-const unsigned short GAIN = 0; //maximum gain
-const unsigned short RANGE = 23; //7 for 34 centimeters
+const unsigned short GAIN =  0x09; //maximum gain
+const unsigned short RANGE =  0x8C; //7 for 34 centimeters
 SRF08 front;
 SRF08 frontRight;
 GP2D120 FrontRight;
@@ -59,20 +65,24 @@ void setup()
   BackRight.attach(A4);
   Back.attach(A3);
   
-  front.attach(112);
-  //front.setGain(GAIN);
-  //front.setRange(RANGE);
-  //front.setPingDelay(70); 
-  /*frontRight.attach(113);
+  /*front.attach(0x71);
+  front.setGain(0);
+  front.setRange(23);
+  front.setPingDelay(200); 
+
   frontRight.setGain(GAIN);
   frontRight.setRange(RANGE);
   frontRight.setPingDelay(70); //uncomment if u want to use custom measurement range
-*/
+  */
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
-  inputString.reserve(25000);
   Serial.begin(115200);
-
+  inputString.reserve(25000);
+  while (!Serial) {
+   ; // wait for serial port to connect. Needed for native USB port only
+  }
+  //frontRight.attach(113);
+  establishContact();
 }
 //Main Program
 void loop()
@@ -150,6 +160,13 @@ void handleInput() { //handle serial input if there is any
   }
 
 }
+void establishContact() {
+  while (Serial.available() <= 0) {
+    Serial.println("[H]");   // send an initial string
+    delay(500);
+  }
+}
+
 int SetAngle(int posofstart){
   int posofend = inputString.indexOf("]");
   int v = 0;
@@ -234,23 +251,31 @@ void SteerCar() {
 
 void NormalizeSensValues() {
   //school testing
-  Serial.println("[IR.22,44;66]");
-  Serial.println("[US.33]");
-  /*delay(100);
+
   IRFR.add(FrontRight.getDistance());
   IRBR.add(Back.getDistance());
   IRB.add(BackRight.getDistance());
-  //USFR.add(frontRight.getDistance());
-  USFC.add(front.getDistance());
+  //USFR.add(float(frontRight.getDistance()));
+
+  //USFC.add(front.getDistance());
   counter++;
   if(counter == 5){
+  FrontRightIR = String(IRFR.getMedian());
+  BackIR = String(IRBR.getMedian());
+  BackRightIR = String(IRB.getMedian());
+  //usFrontRight = String(USFR.getMedian());
+  //usFront = String(USFC.getMedian());
+  IRFR.clear();
+  IRBR.clear();
+  IRB.clear();
+  //USFC.clear();
+  //USFR.clear();
+
+  //Serial.println("[IR.22,44;66]");
+  //  Serial.println("[US.33]");
+  Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
+  //Serial.println("[US" + usFrontRight + "]");
   counter = 0;
-  String FrontRightIR = String(int(IRFR.getMedian()));
-  String BackIR = String(int(IRBR.getMedian()));
-  String BackRightIR = String(int(IRB.getMedian()));
-  //String usFrontRight = String(int(USFR.getMedian()));
-  String usFront = String(int(USFC.getMedian()));
-  Serial.println("[IR" + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
-  Serial.println("[US" + usFront + "]");
-  }*/
+
+  }
 }
