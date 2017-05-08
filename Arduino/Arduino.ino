@@ -54,7 +54,7 @@ int Degrees;
 int Speed;
 const int numReadings = 7;
 int currRead = 0;
-
+int v = 0;
 Odometer encoder(14);
 const int encoderPin = 2;
 
@@ -88,7 +88,7 @@ void setup()
   Serial.begin(115200);
   encoder.attach(encoderPin);
 //  encoder.attach(encoderPin, 12, HIGH);
-  inputString.reserve(25000);
+  inputString.reserve(10000);
   frontRight.attach(113);
 
   while (!Serial) {
@@ -100,7 +100,7 @@ void setup()
 //Main Program
 void loop()
 {
-  delay(25);
+
   int a = pulseIn(ChannelB, HIGH, 35000);
   if (a < 700) {
     a = true;
@@ -186,8 +186,8 @@ void establishContact() {
 
 int SetAngle(int posofstart){
   int posofend = inputString.indexOf("]");
-  int v = 0;
-  v = (inputString.substring(posofstart+2,posofend).toInt()); 
+  Serial.println(inputString.substring(posofstart+3, posofend));
+  v = (inputString.substring(posofstart+3,posofend)).toInt();
   return v;
 }
 void serialEvent() {
@@ -272,9 +272,9 @@ void NormalizeSensValues() {
   IRFR.add(FrontRight.getDistance());
   IRBR.add(Back.getDistance());
   IRB.add(BackRight.getDistance());
-  USFR.add(frontRight.getDistance());
+  //USFR.add(frontRight.getDistance());
   traveledDistance = String(encoder.getDistance()); 
-  Serial.println("[V." + traveledDistance + "]");
+  //Serial.println("[V." + traveledDistance + "]");
 
   //USFC.add(front.getDistance());
   counter++;
@@ -282,19 +282,19 @@ void NormalizeSensValues() {
   FrontRightIR = String(IRFR.getMedian());
   BackIR = String(IRBR.getMedian());
   BackRightIR = String(IRB.getMedian());
-  usFrontRight = String(USFR.getMedian());
+  //usFrontRight = String(USFR.getMedian());
   //usFront = String(USFC.getMedian());
   IRFR.clear();
   IRBR.clear();
   IRB.clear();
   //USFC.clear();
-  USFR.clear();
+  //USFR.clear();
   //get distance traveled since begin() in setup()
 
   //Serial.println("[IR.22,44;66]");
   //  Serial.println("[US.33]");
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
-  Serial.println("[US." + usFrontRight + "]");
+  //Serial.println("[US." + usFrontRight + "]");
   counter = 0;
 
   }
