@@ -90,6 +90,7 @@ namespace automotive {
 
                 // Moving state machine.
                 if (stageMoving == FORWARD) {
+                    vc.setSpeed(1);
                         // Use m_vehicleControl data from image processing.
 
                         stageToRightLaneLeftTurn = 0;
