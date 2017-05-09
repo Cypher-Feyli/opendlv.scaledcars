@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <cmath>
+#include <iostream>
 
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
 #include "opendavinci/odcore/data/Container.h"
@@ -99,8 +100,8 @@ namespace automotive {
                     else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part until both IRs see something.
                         vc.setSpeed(1);
-                        vc.setSteeringWheelAngle(-35);
-                         //useRightLaneMarking = true;
+                        vc.setSteeringWheelAngle(-.52);
+                        cout << "TO_LEFT_LANE_LEFT_TURN    "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR;
@@ -110,7 +111,8 @@ namespace automotive {
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                         vc.setSpeed(.6);
-                        vc.setSteeringWheelAngle(35);
+                        vc.setSteeringWheelAngle(.52);
+                        cout << "TO_LEFT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
@@ -121,30 +123,27 @@ namespace automotive {
                         // Move to the left lane: Passing stage.
 
                         // Use m_vehicleControl data from image processing.
-                    	
+                    	cout << "CONTINUE_ON_LEFT_LANE      " << stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
                         // Find end of object.
                         stageMeasuring = END_OF_OBJECT;
                     }
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
                         vc.setSpeed(1.3);
-                        vc.setSteeringWheelAngle(-35);
-                        //stageMoving = FORWARD;
-                        //stageMeasuring = FIND_OBJECT_INIT;
-                       // m_eSum = 0;
-                       //     m_eOld = 0;
-
+                        vc.setSteeringWheelAngle(-.52);
+                        cout << "TO_RIGHT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
                         stageToRightLaneRightTurn--;
-                        if (stageToRightLaneRightTurn == 0) {
+                        if (stageToRightLaneRightTurn == -13) {
                             stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                         }
                     }
                     else if (stageMoving == TO_RIGHT_LANE_LEFT_TURN) {
+                        cout << "TO_RIGHT_LANE_LEFT_TURN          " << stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
                         // Move to the left lane: Turn left part.
                         
                         
                         vc.setSpeed(2);
-                        vc.setSteeringWheelAngle(-35);
+                        vc.setSteeringWheelAngle(-.52);
                      
                         stageToRightLaneLeftTurn = 0;
                         if (stageToRightLaneLeftTurn == 0) {
@@ -155,9 +154,6 @@ namespace automotive {
                             distanceToObstacle = 0;
                             distanceToObstacleOld = 0;
 
-                            // Reset PID controller.
-                           // m_eSum = 0;
-                            //m_eOld = 0;
                         }
                     }
 
@@ -205,9 +201,7 @@ namespace automotive {
                             // Straight forward again.
                             stageMoving = CONTINUE_ON_LEFT_LANE;
 
-                            // Reset PID controller.
-                          //  m_eSum = 0;
-                           // m_eOld = 0;
+                            
                         }
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
