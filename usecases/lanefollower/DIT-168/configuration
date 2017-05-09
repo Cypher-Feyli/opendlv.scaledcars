@@ -19,7 +19,7 @@
 # GLOBAL CONFIGURATION
 #
 global.car = file:///opt/config/Car1.objx
-global.scenario = file:///opt/config/pb.scnx
+global.scenario = file:///opt/config/over.scnx
 global.showGrid = 0
 
 # Location of the origin of the reference frame (example: 57.70485804 N, 11.93831921 E)

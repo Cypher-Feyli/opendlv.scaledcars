@@ -43,7 +43,7 @@ services:
             - "/dev/video1:/dev/video0"
         depends_on:
             - odsupercomponent
-        command: bash -c "sleep 1; /opt/opendlv.scaledcars/bin/miniature/proxy -rm=true --privileged=true --verbose=1 --cid=${CID} --freq=20"
+        command: "/opt/opendlv.scaledcars/bin/miniature/proxy -rm=true --privileged=true --verbose=1 --cid=${CID} --freq=20"
     # Micro-service for odsimvehicle.
 
    #Micro-service for lanedtecter scenario.
@@ -58,4 +58,4 @@ services:
         - ./DIT-168:/opt/config
         depends_on:
             - odsupercomponent
-        command: bash -c "sleep 5; /opt/opendlv.scaledcars/bin/miniature/lanefollower --verbose=1  --cid=${CID} --freq=20 -e DISPLAY=$DISPLAY"
+        command: " /opt/opendlv.scaledcars/bin/miniature/lanefollower --verbose=1  --cid=${CID} --freq=20 -e DISPLAY=$DISPLAY"
