@@ -55,7 +55,7 @@ int Speed;
 const int numReadings = 7;
 int currRead = 0;
 int v = 0;
-Odometer encoder(14);
+Odometer encoder;
 const int encoderPin = 2;
 
 int pi = 3.14159265359;
@@ -85,10 +85,11 @@ void setup()
   */
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
+   // encoder.attach(encoderPin);
+  encoder.attach(2, 4, HIGH);
+
   Serial.begin(115200);
-  encoder.attach(encoderPin);
-//  encoder.attach(encoderPin, 12, HIGH);
-  inputString.reserve(40000);
+  inputString.reserve(20000);
 //  frontRight.attach(113);
 
   while (!Serial) {
@@ -186,8 +187,7 @@ void establishContact() {
 
 int SetAngle(int posofstart){
   int posofend = inputString.indexOf("]");
-  Serial.println(inputString.substring(posofstart+3, posofend));
-  v = (inputString.substring(posofstart+3,posofend)).toInt();
+  v = (inputString.substring(posofstart+2,posofend).toInt()); 
   return v;
 }
 void serialEvent() {
@@ -269,9 +269,9 @@ void SteerCar() {
 void NormalizeSensValues() {
   //school testing
 
-  IRFR.add(FrontRight.getDistance());
-  IRBR.add(Back.getDistance());
-  IRB.add(BackRight.getDistance());
+  IRFR.add(float(FrontRight.getDistance()));
+  IRBR.add(float(Back.getDistance()));
+  IRB.add(float(BackRight.getDistance()));
   //USFR.add(frontRight.getDistance());
   traveledDistance = String(encoder.getDistance()); 
   Serial.println("[V." + traveledDistance + "]");
@@ -279,6 +279,7 @@ void NormalizeSensValues() {
   //USFC.add(front.getDistance());
   counter++;
   if(counter == 5){
+  
   FrontRightIR = String(IRFR.getMedian());
   BackIR = String(IRBR.getMedian());
   BackRightIR = String(IRB.getMedian());
@@ -292,10 +293,11 @@ void NormalizeSensValues() {
   //get distance traveled since begin() in setup()
 
   //Serial.println("[IR.22,44;66]");
-    Serial.println("[US.33]");
+
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
+  Serial.println("[US.33]");
   //Serial.println("[US." + usFrontRight + "]");
   counter = 0;
 
-  }
+ }
 }
