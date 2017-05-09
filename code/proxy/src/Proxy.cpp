@@ -204,16 +204,16 @@ namespace automotive {
                     int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
                     std::string angleString = std::to_string(Angle1);
                     if(speed1 >= 1){ 
-                        serial->send("[F," + angleString + "]");
+                        serial->send("[F" + angleString + "]");
                     }
                     if(speed < 1 && speed > 0){
-                        serial->send("[K," + angleString + "]");
+                        serial->send("[K" + angleString + "]");
                     }
-                    else if(Angle1 == 0){
-                        serial->send("[S," + angleString + "]");
+                    else if(speed1 == 0){
+                        serial->send("[S" + angleString + "]");
                     }
                     else if(speed1 < 0){
-                        serial->send("[B," + angleString + "]");
+                        serial->send("[B" + angleString + "]");
                     }
                 }
             }
