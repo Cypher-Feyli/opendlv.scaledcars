@@ -54,11 +54,7 @@ namespace automotive {
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
-           // const double ULTRASONIC_FRONT_RIGHT = 0;
-            //const double WHEEL_ENCODER = 5;
-            const double INFRARED_FRONT_RIGHT = 0;
-            //const double INFRARED_REAR_CENTER = 2;
-
+            const double ULTRASONIC_FRONT_RIGHT = 0;
             double distanceOld = 0;
             double absPathStart = 0;
             double absPathEnd = 0;
@@ -74,16 +70,7 @@ namespace automotive {
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-               //0 front right
-               //1 back 
-               //
-
-                 //sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT)
-                // double value = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
-                  //cerr << "value" << Distance << endl;
-                // double Distance = vd.getAbsTraveledPath();;
-                // cerr << "distance" << distanceOld<< endl; 
-                 
+        
 
                 // Create vehicle control data.
                 VehicleControl vc;
@@ -95,13 +82,12 @@ namespace automotive {
                     vc.setSteeringWheelAngle(0);
                 }
                 if ((stageMoving > 0) && (stageMoving < 10)) {
-                    // Move slightly forward.
+                    // Move slightly forward.10 tics
                     vc.setSpeed(1);
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
                 if ((stageMoving >= 10) && (stageMoving < 15)) {
-                    cerr << "===========PARKING============" << endl;
                     // Stop.find the parking gap
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
@@ -134,7 +120,7 @@ namespace automotive {
 
 
                 }
-                                   //220  //260 straight
+                                  //128 
                 if (stageMoving >= 130) {
                     // Stop.
                     vc.setSpeed(0);
@@ -156,29 +142,29 @@ namespace automotive {
                     case 0:
                         {
                             // Initialize measurement.
-                            distanceOld =sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
+                            distanceOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
                             stageMeasuring++;
                         }
                     break;
                     case 1:
                         {
                             // Checking for sequence +, -. US does not obstacle ,start value for sensor is -1.
-                            if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < 0)) {
+                            if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) < 0)) {
                                 // Found sequence +, -.
-                                    
+                                   // cerr << "Value = " << sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) << endl;
                                 stageMeasuring = 2;
                                 //find start of gap
 
                                 absPathStart = vd.getAbsTraveledPath();
                             }
-                            distanceOld = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
+                            distanceOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
                             
                         }
                     break;
                     case 2:
                         {
                             // Checking for sequence -, +.
-                            if ((distanceOld < 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0)) {
+                            if ((distanceOld < 0) && (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) > 0)) {
                                 // Found sequence -, +.
                                 stageMeasuring = 1;
                                 // find end of gap   US find obstacle ,value bigger than 0.
@@ -192,11 +178,11 @@ namespace automotive {
 
                                                           //set parking gap 
                                 if ((stageMoving < 1) && (GAP_SIZE > 10)) {
-                                    //do parking
+                                    
                                     stageMoving = 1;
                                 }
                             }
-                            distanceOld = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
+                            distanceOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
                         }
                     break;
                 }
@@ -211,3 +197,4 @@ namespace automotive {
         }
     }
 } // automotive::miniature
+
