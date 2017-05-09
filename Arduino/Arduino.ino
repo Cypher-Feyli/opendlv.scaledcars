@@ -88,8 +88,8 @@ void setup()
   Serial.begin(115200);
   encoder.attach(encoderPin);
 //  encoder.attach(encoderPin, 12, HIGH);
-  inputString.reserve(10000);
-  frontRight.attach(113);
+  inputString.reserve(40000);
+//  frontRight.attach(113);
 
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
@@ -274,7 +274,7 @@ void NormalizeSensValues() {
   IRB.add(BackRight.getDistance());
   //USFR.add(frontRight.getDistance());
   traveledDistance = String(encoder.getDistance()); 
-  //Serial.println("[V." + traveledDistance + "]");
+  Serial.println("[V." + traveledDistance + "]");
 
   //USFC.add(front.getDistance());
   counter++;
@@ -292,7 +292,7 @@ void NormalizeSensValues() {
   //get distance traveled since begin() in setup()
 
   //Serial.println("[IR.22,44;66]");
-  //  Serial.println("[US.33]");
+    Serial.println("[US.33]");
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
   //Serial.println("[US." + usFrontRight + "]");
   counter = 0;
