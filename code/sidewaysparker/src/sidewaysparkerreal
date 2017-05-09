@@ -82,7 +82,7 @@ namespace automotive {
                 // double value = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                   //cerr << "value" << Distance << endl;
                 // double Distance = vd.getAbsTraveledPath();;
-                 cerr << "distance" << distanceOld<< endl; 
+                // cerr << "distance" << distanceOld<< endl; 
                  
 
                 // Create vehicle control data.
@@ -101,6 +101,7 @@ namespace automotive {
                     stageMoving++;
                 }
                 if ((stageMoving >= 10) && (stageMoving < 15)) {
+                    cerr << "===========PARKING============" << endl;
                     // Stop.find the parking gap
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
@@ -155,7 +156,7 @@ namespace automotive {
                     case 0:
                         {
                             // Initialize measurement.
-                            distanceOld = vd.getAbsTraveledPath();
+                            distanceOld =sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                             stageMeasuring++;
                         }
                     break;
@@ -164,13 +165,13 @@ namespace automotive {
                             // Checking for sequence +, -. US does not obstacle ,start value for sensor is -1.
                             if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < 0)) {
                                 // Found sequence +, -.
-                                    cerr << "Value = " << sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) << endl;
+                                    
                                 stageMeasuring = 2;
                                 //find start of gap
 
                                 absPathStart = vd.getAbsTraveledPath();
                             }
-                            distanceOld = vd.getAbsTraveledPath();
+                            distanceOld = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                             
                         }
                     break;
@@ -190,12 +191,12 @@ namespace automotive {
                                 cerr << "Size = " << GAP_SIZE << endl;
 
                                                           //set parking gap 
-                                if ((stageMoving < 1) && (GAP_SIZE > 50)) {
+                                if ((stageMoving < 1) && (GAP_SIZE > 10)) {
                                     //do parking
                                     stageMoving = 1;
                                 }
                             }
-                            distanceOld = vd.getAbsTraveledPath();
+                            distanceOld = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                         }
                     break;
                 }
@@ -210,4 +211,3 @@ namespace automotive {
         }
     }
 } // automotive::miniature
-
