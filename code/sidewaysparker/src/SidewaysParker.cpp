@@ -163,7 +163,7 @@ namespace automotive {
                     case 1:
                         {
                             // Checking for sequence +, -. US does not obstacle ,start value for sensor is -1.
-                            if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < 0)) {
+                            if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < 1)) {
                                 // Found sequence +, -.
                                     
                                 stageMeasuring = 2;
