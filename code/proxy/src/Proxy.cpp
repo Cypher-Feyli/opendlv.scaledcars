@@ -201,7 +201,9 @@ namespace automotive {
                     double Angle = vehicleControlData.getSteeringWheelAngle();
                     int speed1 = (int) speed;
 
-                    int Angle1 = (int) 90 + (Angle * (180 / 3.1415926535)); // Cast angle to int
+                    int Angle1 = (int) 81  + (Angle * (180 / 3.1415926535)); // Cast angle to int
+                    cerr << "qweqwe"<<Angle1 << endl;
+                    cerr << "dir" << speed1 << endl;
                     std::string angleString = std::to_string(Angle1);
                     if(speed1 >= 1){ 
                         serial->send("[F" + angleString + "]");
