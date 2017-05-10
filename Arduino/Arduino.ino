@@ -135,7 +135,7 @@ void handleInput() { //handle serial input if there is any
   }
     switch (dir[0]) {
       case 'F': //rotate counter-clockwise going forward
-        CarMotor.writeMicroseconds(1554);
+        CarMotor.writeMicroseconds(1552);
         myServo.write(angle);
         break;
       case 'K': //rotate counter-clockwise going forward
@@ -147,7 +147,7 @@ void handleInput() { //handle serial input if there is any
         CarMotor.writeMicroseconds(1500);
         break;
       case 'B': //turn clock-wise
-        CarMotor.writeMicroseconds(1290);
+        CarMotor.writeMicroseconds(1245);
         myServo.write(angle);
         break;
       /* case 'r': //turn clock-wise
@@ -175,6 +175,11 @@ void handleInput() { //handle serial input if there is any
          myServo.write(90);
          CarMotor.writeMicroseconds(1500);
          break;*/
+         default: 
+         myServo.write(90);
+         CarMotor.writeMicroseconds(1500);
+         break;
+         
   }
 
 }
@@ -273,7 +278,7 @@ void NormalizeSensValues() {
   IRBR.add(float(Back.getDistance()));
   IRB.add(float(BackRight.getDistance()));
   //USFR.add(frontRight.getDistance());
-  traveledDistance = String(encoder.getDistance()); 
+  traveledDistance = String((encoder.getDistance()*6.806784082777885667)); 
   Serial.println("[V." + traveledDistance + "]");
 
   //USFC.add(front.getDistance());
