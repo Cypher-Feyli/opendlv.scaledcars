@@ -157,12 +157,9 @@ namespace automotive {
         void LaneFollower::processImage() {
              //canny edge detection(http://docs.opencv.org/2.4/modules/imgproc/doc/feature_detection.html?highlight=canny)
             
-            Mat mat(m_image), dst, color_dst;
-            
-
-
-            Canny( mat, dst, 90, 150, 3);
-            cvtColor( dst,color_dst, CV_GRAY2BGR);
+            Mat unprocessed(m_image),gray, canny_image;
+            cvtColor( unprocessed, gray, CV_BGR2GRAY );
+            Canny( gray, canny_image, 90, 150, 3);
             
            
 
@@ -262,8 +259,8 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    imshow("real",  mat)
-                    imshow("processed",  color_dst);
+                    imshow("unprocessed",  unprocessed);
+                    imshow("cannyV1",  canny_image);
                     cvWaitKey(10);
                 }
             }
