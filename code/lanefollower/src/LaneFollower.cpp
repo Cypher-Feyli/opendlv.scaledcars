@@ -159,6 +159,7 @@ namespace automotive {
             
             Mat unprocessed(m_image),gray, canny_image;
             cvtColor( unprocessed, gray, CV_BGR2GRAY );
+            //Laplacian( gray,canny, CV_16S, 3, 1, 0, BORDER_DEFAULT );
             Canny( gray, canny_image, 90, 150, 3);
             
            
@@ -177,28 +178,36 @@ namespace automotive {
             for(int32_t y = m_image->height - 8; y > m_image->height * .6; y -= 10) {
                 // Search from middle to the left:
                 // cvscalar is an array that stores integers representing for example the color [210,0,0] red
-                CvScalar pixelLeft;
-                CvPoint left;
+                //CvScalar pixelLeft;
+                // uchar should be faster
+                uchar pixelLeft;
+               // CvPoint left;
+                Point left;
                 left.y = y;
                 left.x = -1;
-                  for(int x = (m_image->width/2); x > 0; x--) {
-                  // here we get the pixel value at location y,x in the matrix m_image
-                    pixelLeft = cvGet2D(m_image, y, x);
-                            // when finding a non black pixel or pixel that contains red, break the loop and store the x value which is the vertical pixel location 
-                    if (pixelLeft.val[0] >= 200) {
+                  for(int x = (m_image->width/2); x > 0; x-=2) {
+
+                    
+                  // here we get the pixel value at location y,x in the mat canny_image  is black and 255 is white
+                    pixelLeft = canny_image.at<uchar>(Point(x, y));
+                   // pixelLeft = cvGet2D(newImage, y, x);
+                            // when finding a non black pixel, break the loop and store the x value which is the vertical pixel location 
+                     if (pixelLeft > 150)  {
                         left.x = x;
                         break;
                     }
                 }
 
                 // Search from middle to the right:
-                CvScalar pixelRight;
-                CvPoint right;
+               // CvScalar pixelRight;
+                uchar pixelRight;
+               // CvPoint right;
+                Point right;
                 right.y = y;
                 right.x = -1;
-                for(int x = (m_image->width/2); x < m_image->width; x++) {
-                    pixelRight = cvGet2D(m_image, y, x);
-                    if (pixelRight.val[0] >= 200) {
+                for(int x = (m_image->width/2); x < m_image->width; x+=2) {
+                    pixelRight = canny_image.at<uchar>(Point(x, y));
+                    if (pixelRight > 150)  {
                         right.x = x;
                         break;
                     }
