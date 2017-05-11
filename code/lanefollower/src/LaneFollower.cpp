@@ -165,11 +165,6 @@ namespace automotive {
             cvtColor( dst,color_dst, CV_GRAY2BGR);
             
            
-            IplImage newImage = color_dst;
-
-            std::memcpy(m_image->imageData,
-                               newImage.imageData, newImage.imageSize);
-
 
            // static bool useRightLaneMarking = true;
             double e = 0;
@@ -267,7 +262,9 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    cvShowImage("WindowShowImage", m_image);
+                    namedWindow("WindowShowImage", 1);
+                    imshow("real",  mat)
+                    imshow("processed",  color_dst);
                     cvWaitKey(10);
                 }
             }
