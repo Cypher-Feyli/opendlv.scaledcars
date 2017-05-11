@@ -262,7 +262,6 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    namedWindow("WindowShowImage", 1);
                     imshow("real",  mat)
                     imshow("processed",  color_dst);
                     cvWaitKey(10);
