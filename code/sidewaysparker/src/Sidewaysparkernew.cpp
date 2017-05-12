@@ -26,7 +26,7 @@
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
-#include "ParallelParker.h"
+#include "SidewaysParker"
 
 namespace automotive {
     namespace miniature {
