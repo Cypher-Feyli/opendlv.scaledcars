@@ -318,7 +318,6 @@ namespace automotive {
             m_vehicleControl.setSpeed(2);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);
         }
-
             void LaneFollower::overtaker(){
                  // Parameters for overtaking.
             
@@ -374,7 +373,7 @@ namespace automotive {
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
                         m_vehicleControl.setSpeed(1.3);
-                       m_vehicleControl.setSteeringWheelAngle(0.52);
+                       m_vehicleControl.setSteeringWheelAngle(0.17);// 0.52
                        cerr << "TO_RIGHT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
                         
 
@@ -416,6 +415,7 @@ namespace automotive {
 
                         // Approaching an obstacle (stationary or driving slower than us).
                         if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
+                            //
                             // Check if overtaking shall be started.                        
                             stageMeasuring = FIND_OBJECT_PLAUSIBLE;
                         }
@@ -457,9 +457,9 @@ namespace automotive {
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
                         // Find end of object.
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
+                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);// it was ultra sonic front center originaly
 
-                        if (distanceToObstacle < 0) {
+                        if (distanceToObstacle <= 0) {
                             // Move to right lane again.
                             stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
 
@@ -468,6 +468,7 @@ namespace automotive {
                         }
                     }
 }
+
         // This method will do the main data processing job.
         // Therefore, it tries to open the real camera first. If that fails, the virtual camera images from camgen are used.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
