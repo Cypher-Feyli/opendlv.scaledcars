@@ -84,10 +84,13 @@ namespace automotive {
                 // double Distance = vd.getAbsTraveledPath();;
                 // cerr << "distance" << distanceOld<< endl; 
                  
-
+                cerr << "Heeeej" << endl;
                 // Create vehicle control data.
                 VehicleControl vc;
-
+                
+                cerr << "StageMoving " << stageMoving << endl;
+                cerr << "Sensordata " << sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
+                cerr << "StageMeasuring" << stageMeasuring << endl;
                 // Moving state machine.
                 if (stageMoving == 0) {
                     // Go forward.default speed 1
@@ -110,25 +113,28 @@ namespace automotive {
                 if ((stageMoving >= 15) && (stageMoving < 70)) {
                     // Backwards, steering wheel to the right.
                     vc.setSpeed(-1);
-                    vc.setSteeringWheelAngle(25);
+					                         //45 
+                    vc.setSteeringWheelAngle(0.7853981634);
                     stageMoving++;
                 }
                 if ((stageMoving >= 70) && (stageMoving < 100)) {
                     // Backwards, steering wheel to the left.
-                    vc.setSpeed(-1);
-                    vc.setSteeringWheelAngle(-25);
+                    vc.setSpeed(-1);         
+					                         //25
+                    vc.setSteeringWheelAngle(-0.436332313);
                     stageMoving++;
                 }
                 if ((stageMoving >= 100) && (stageMoving < 105)) {
                     // turn left to straight up
                     vc.setSpeed(0);
-                    vc.setSteeringWheelAngle(-25);
+                    vc.setSteeringWheelAngle(-0.436332313);
                     stageMoving++;
-                }
+                }                            
                   if ((stageMoving >= 105) && (stageMoving < 130)) {
                     //  turn right to straight up.
                     vc.setSpeed(1);
-                    vc.setSteeringWheelAngle(10);
+					                         // 10
+                    vc.setSteeringWheelAngle(0.1745329252);
                     stageMoving++;
 
 
@@ -163,7 +169,7 @@ namespace automotive {
                     case 1:
                         {
                             // Checking for sequence +, -. US does not obstacle ,start value for sensor is -1.
-                            if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < 0)) {
+                            if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) <= 0)) {
                                 // Found sequence +, -.
                                     
                                 stageMeasuring = 2;
@@ -177,11 +183,11 @@ namespace automotive {
                     break;
                     case 2:
                         {
-                            // Checking for sequence -, +.
-                            if ((distanceOld < 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0)) {
+                            // Checking for sequence -, +. real car distanceold big than 0
+                            if ((distanceOld <= 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0)) {
                                 // Found sequence -, +.
                                 stageMeasuring = 1;
-                                // find end of gap   US find obstacle ,value bigger than 0.
+                                // find end of gap   IF  find obstacle ,value bigger than 0.
 
                                 absPathEnd = vd.getAbsTraveledPath();
                               
@@ -191,7 +197,7 @@ namespace automotive {
                                 cerr << "Size = " << GAP_SIZE << endl;
 
                                                           //set parking gap 
-                                if ((stageMoving < 1) && (GAP_SIZE > 50)) {
+                                if ((stageMoving < 1) && (GAP_SIZE > 40)) {
                                     //do parking
                                     stageMoving = 1;
                                 }
