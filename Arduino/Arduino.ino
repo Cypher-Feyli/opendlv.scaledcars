@@ -64,6 +64,7 @@ int currRead = 0;
 int v = 0;
 Odometer encoder;
 const int encoderPin = 2;
+int posofend;
 
 int pi = 3.14159265359;
 Servo myServo, CarMotor;  //Steering Servo
@@ -92,7 +93,7 @@ void setup()
   */
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
-  encoder.attach(encoderPin);
+  encoder.attach(2);
   //encoder.attach(2, 4, HIGH);
 
   Serial.begin(115200);
@@ -104,8 +105,9 @@ void setup()
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
   }
-  encoder.begin(); // begin measurement HERE
   establishContact();
+  encoder.begin(); // begin measurement HERE
+
 }
 //Main Program
 void loop()
@@ -134,22 +136,25 @@ void handleInput() { //handle serial input if there is any
     b = false;
   }
   posofstart = inputString.indexOf("[");
+  posofend = inputString.indexOf("]");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
-  angle = SetAngle(posofstart);
-  if(angle < 55){
-    angle = 55;
+  angle = SetAngle(posofstart, posofend);
+  if(angle > 55){
+    
+  if(angle < 60){
+    angle = 60;
   }
-  else if( angle > 106){
-    angle = 106;
+  else if( angle > 101){
+    angle = 101;
   }
-  if(angle > 55 && angle < 106){
+  if(angle > 60 && angle < 101){
     TurnOffBlinkers(0);
   }
-  else if(angle < 56){
-    chaseLeftBlinker(strip.Color(255,255,0));
+  else if(angle < 61){
+    chaseLeftBlinker(strip.Color(255,150,0));
   }
-  else if(angle >105){
-    chaseRightBlinker(strip.Color(255,255,0));
+  else if(angle >100){
+    chaseRightBlinker(strip.Color(255,150,0));
   }
   if(dir[0] == 'F' || dir[0] == 'K'){
     Blinkers(strip.Color(0,255,0));
@@ -158,7 +163,7 @@ void handleInput() { //handle serial input if there is any
     Blinkers(strip.Color(255,0,0));
   }
   else if(dir[0] == 'S'){
-    Blinkers(0);
+    Blinkers(strip.Color(32,32,32));
   }
     switch (dir[0]) {
       case 'F': //rotate counter-clockwise going forward
@@ -208,7 +213,7 @@ void handleInput() { //handle serial input if there is any
          break;
          
   }
-
+  }
 }
 void establishContact() {
   while (Serial.available() <= 0) {
@@ -217,8 +222,7 @@ void establishContact() {
   }
 }
 
-int SetAngle(int posofstart){
-  int posofend = inputString.indexOf("]");
+int SetAngle(int posofstart, int posofend){
   v = (inputString.substring(posofstart+2,posofend).toInt()); 
   return v;
 }
@@ -226,13 +230,14 @@ void serialEvent() {
   while (Serial.available() && !stringComplete) {
     // get the new byte:
     char inChar = (char)Serial.read();
-    inputString += inChar;
     if(inChar == '['){
       breakLoop = true;
     }
+    if(breakLoop){
+      inputString += inChar;
+    }
     if (inChar == ']' && breakLoop) {
       stringComplete = true;
-      break;
     }
   }
 }
@@ -305,12 +310,12 @@ void NormalizeSensValues() {
   IRBR.add(float(Back.getDistance()));
   IRB.add(float(BackRight.getDistance()));
   //USFR.add(frontRight.getDistance());
-  traveledDistance = String((encoder.getDistance()*4)); 
+  traveledDistance = String((encoder.getDistance()*4.2)); 
   Serial.println("[V." + traveledDistance + "]");
 
   //USFC.add(front.getDistance());
   counter++;
-  if(counter == 5){
+  if(counter == 3){
   
   FrontRightIR = String(IRFR.getMedian());
   BackIR = String(IRBR.getMedian());
@@ -327,7 +332,7 @@ void NormalizeSensValues() {
   //Serial.println("[IR.22,44;66]");
 
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
-  Serial.println("[US.33]");
+  Serial.println("[US.100]");
   //Serial.println("[US." + usFrontRight + "]");
   counter = 0;
 
@@ -356,10 +361,12 @@ static void chaseLeftBlinker(uint32_t c) {
       strip.show();
 }
 static void TurnOffBlinkers(uint32_t c) {
-      strip.setPixelColor(0  , c); // Draw new pixel
-      strip.setPixelColor(1  , c); // Draw new pixel
-      strip.setPixelColor(6  , c); // Draw new pixel
-      strip.setPixelColor(7  , c); // Draw new pixel
+      strip.setPixelColor(0  , 0); // Draw new pixel
+      strip.setPixelColor(1  , 0); // Draw new pixel
+      strip.setPixelColor(3  , c); // Draw new pixel
+      strip.setPixelColor(4  , c); // Draw new pixel
+      strip.setPixelColor(6  , 0); // Draw new pixel
+      strip.setPixelColor(7  , 0); // Draw new pixel
       strip.show();
 }
 static void chaseRightBlinker(uint32_t c) {
