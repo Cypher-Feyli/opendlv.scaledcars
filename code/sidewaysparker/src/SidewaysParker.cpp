@@ -146,8 +146,8 @@ namespace automotive {
 
 
                 }
-                                   //220  //260 straight
-                if (stageMoving >= 130) {
+                                   //220  //260 straight (stageMoving >= 130)
+                else {
                     // Stop.
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
