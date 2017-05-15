@@ -162,14 +162,13 @@ namespace automotive {
             Mat croppedImage = unprocessed(cropArea);
             cvtColor( croppedImage, gray, CV_BGR2GRAY );
             Canny( gray, canny_image, 90, 150, 3);
-            vector<Vec4i> lines;
+            /*vector<Vec4i> lines;
             HoughLinesP(canny_image, lines, 1, CV_PI/180, 50, 50, 10 );
             for( size_t i = 0; i < lines.size(); i++ )
             {
               Vec4i l = lines[i];
               line( canny_image, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,255,255), 3, CV_AA);
-            }
-            
+            }*/
            
 
            // static bool useRightLaneMarking = true;
