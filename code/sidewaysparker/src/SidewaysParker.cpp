@@ -203,7 +203,7 @@ namespace automotive {
                                 cerr << "Size = " << GAP_SIZE << endl;
 
                                                           //set parking gap 
-                                if ((stageMoving < 1) && (GAP_SIZE > 40)) {
+                                if ((stageMoving < 1) && (GAP_SIZE > 50)) {
                                     //do parking
                                     stageMoving = 1;
                                 }
