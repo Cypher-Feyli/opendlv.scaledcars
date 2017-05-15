@@ -158,28 +158,35 @@ namespace automotive {
              //canny edge detection(http://docs.opencv.org/2.4/modules/imgproc/doc/feature_detection.html?highlight=canny)
             
             Mat unprocessed(m_image),gray, canny_image;
-            cvtColor( unprocessed, gray, CV_BGR2GRAY );
-            //Laplacian( gray,canny, CV_16S, 3, 1, 0, BORDER_DEFAULT );
+            Rect cropArea(0, 288, 640, 192); 
+            Mat croppedImage = unprocessed(cropArea);
+            cvtColor( croppedImage, gray, CV_BGR2GRAY );
             Canny( gray, canny_image, 90, 150, 3);
+            vector<Vec4i> lines;
+            HoughLinesP(canny_image, lines, 1, CV_PI/180, 50, 50, 10 );
+            for( size_t i = 0; i < lines.size(); i++ )
+            {
+              Vec4i l = lines[i];
+              line( canny_image, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,255,255), 3, CV_AA);
+            }
             
            
 
            // static bool useRightLaneMarking = true;
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 462; // calibrated length to right: 280px
+            const int32_t CONTROL_SCANLINE = 174; 
             const int32_t distance = 280;
 
 
             TimeStamp beforeImageProcessing;
-            // this loop first goes through the top of the camera view and ends at imageheight * .6.
-            // starting the loop with the integer image->height -8 which is 472 and continue the loop as long as
-            // y is bigger than imageheight * .6, y decreases with 10 every loop
-            for(int32_t y = m_image->height - 8; y > m_image->height * .6; y -= 10) {
+           // this loop first goes through the bottom of the image - 8 and ends at imageheight 0.
+            // starting the loop with the integer 184 and continue the loop as long as
+            // y is bigger than 0, y decreases with 10 every loop
+            for(int32_t y = 184; y > 0; y -= 10) {
                 // Search from middle to the left:
                 // cvscalar is an array that stores integers representing for example the color [210,0,0] red
                 //CvScalar pixelLeft;
-                // uchar should be faster
                 uchar pixelLeft;
                // CvPoint left;
                 Point left;
@@ -187,8 +194,8 @@ namespace automotive {
                 left.x = -1;
                   for(int x = (m_image->width/2); x > 0; x-=2) {
 
-                    
-                  // here we get the pixel value at location y,x in the mat canny_image  is black and 255 is white
+                    //http://answers.opencv.org/question/1870/find-pixel-color-out-of-cvmat-on-specific-position/
+                  // here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
                     pixelLeft = canny_image.at<uchar>(Point(x, y));
                    // pixelLeft = cvGet2D(newImage, y, x);
                             // when finding a non black pixel, break the loop and store the x value which is the vertical pixel location 
@@ -215,22 +222,31 @@ namespace automotive {
 
                 if (m_debug) {
                     if (left.x > 0) {
-                        CvScalar green = CV_RGB(0, 255, 0);
-                        cvLine(m_image, cvPoint(m_image->width/2, y), left, green, 1, 8);
+                      //  CvScalar green = CV_RGB(0, 255, 0);
+                     //   cvLine(m_image, cvPoint(m_image->width/2, y), left, green, 1, 8);
+                        // grayscaled image so have to make the lines white
+                        Scalar green = CV_RGB(255, 255, 255);
 
-                        stringstream sstr;
-                        sstr << (m_image->width/2 - left.x);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, green);
+                        line(croppedImage, Point(m_image->width/2, y), left, green);
+
+                      //  stringstream sstr;
+                      //  sstr << (m_image->width/2 - left.x);
+                      //  cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, green);
                     }
                     if (right.x > 0) {
-                        CvScalar red = CV_RGB(255, 0, 0);
-                        cvLine(m_image, cvPoint(m_image->width/2, y), right, red, 1, 8);
+                       // CvScalar red = CV_RGB(255, 0, 0);
+                     //   cvLine(m_image, cvPoint(m_image->width/2, y), right, red, 1, 8);
 
-                        stringstream sstr;
-                        sstr << (right.x - m_image->width/2);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, red);
+                        Scalar red = CV_RGB(255, 255, 255);
+
+                        line(croppedImage, Point(m_image->width/2, y), right, red);
+
+                      //  stringstream sstr;
+                      //  sstr << (right.x - m_image->width/2);
+                      //  cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, red);
                     }
                 }
+
 
                 if (y == CONTROL_SCANLINE) {
                     // Calculate the deviation error.
@@ -268,7 +284,7 @@ namespace automotive {
             // Show resulting features.
             if (m_debug) {
                 if (m_image != NULL) {
-                    imshow("unprocessed",  unprocessed);
+                    imshow("unprocessed",  croppedImage);
                     imshow("cannyV1",  canny_image);
                     cvWaitKey(10);
                 }
@@ -318,6 +334,7 @@ namespace automotive {
             m_vehicleControl.setSpeed(2);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);
         }
+
             void LaneFollower::overtaker(){
                  // Parameters for overtaking.
             
@@ -373,7 +390,7 @@ namespace automotive {
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
                         m_vehicleControl.setSpeed(1.3);
-                       m_vehicleControl.setSteeringWheelAngle(0.17);// 0.52
+                       m_vehicleControl.setSteeringWheelAngle(0.52);
                        cerr << "TO_RIGHT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
                         
 
@@ -415,7 +432,6 @@ namespace automotive {
 
                         // Approaching an obstacle (stationary or driving slower than us).
                         if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
-                            //
                             // Check if overtaking shall be started.                        
                             stageMeasuring = FIND_OBJECT_PLAUSIBLE;
                         }
@@ -457,9 +473,9 @@ namespace automotive {
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
                         // Find end of object.
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);// it was ultra sonic front center originaly
+                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
 
-                        if (distanceToObstacle <= 0) {
+                        if (distanceToObstacle < 0) {
                             // Move to right lane again.
                             stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
 
@@ -468,7 +484,6 @@ namespace automotive {
                         }
                     }
 }
-
         // This method will do the main data processing job.
         // Therefore, it tries to open the real camera first. If that fails, the virtual camera images from camgen are used.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -507,7 +522,7 @@ namespace automotive {
                 if (true == has_next_frame) {
                     processImage();
                 }//if (sbd.getValueForKey_MapOfDistances(3)>2){
-                 overtaker();
+               //  overtaker();
           //  }
                  //   overtaker();
                 // Create container for finally sending the set values for the control algorithm.
