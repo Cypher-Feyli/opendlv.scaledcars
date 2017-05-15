@@ -71,28 +71,50 @@ void DataParser::nextString(const string &s) {
         }
     }
 }
-
+/**
+ * Return a bool which Indicates if SensorBoardData is done.
+ */
 bool DataParser::DataDoneSBD(){
     return done;
 }
+/**
+ * The map with all the sensorboarddata
+ * Returns the map.
+ */
 map<uint32_t, double> DataParser::GetValuesSBD(){
     return mapValues;
 }
+/**
+ * Return a bool to indicate if vehicledata is done
+ */
 bool DataParser::DataDoneVD(){
     return vehicledata;
 }
+/**
+ * Returns a double which is data travelled
+ */
 double DataParser::GetValuesVD(){
     return dist;
 }
+/**
+ * Returns a bool that indicates if a handshake was made
+ */
 bool DataParser::Handshake(){
     return handshake;
 }
+/**
+ * Resets sensorboarddata
+ * and reset all booleans that indicate done values.
+ */
 void DataParser::ResetSBD(){
     mapValues.clear();
     usvals = false;
     irvals = false;
     done = false;
 }
+/**
+ * Resets vehicledata
+ */
 void DataParser::ResetVD(){
     dist = 0;
     vehicledata = false;
