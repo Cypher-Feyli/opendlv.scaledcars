@@ -524,7 +524,7 @@ namespace automotive {
                 }//if (sbd.getValueForKey_MapOfDistances(3)>2){
                //  overtaker();
           //  }
-                 //   overtaker();
+                    overtaker();
                 // Create container for finally sending the set values for the control algorithm.
                 Container c2(m_vehicleControl);
                 // Send container.
