@@ -139,7 +139,7 @@ void handleInput() { //handle serial input if there is any
   posofend = inputString.indexOf("]");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart, posofend);
-  if(angle > 55){
+  if(angle > 45){
     
   if(angle < 60){
     angle = 60;
