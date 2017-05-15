@@ -3,6 +3,13 @@ String incomingByte = "";   // for incoming serial data
 int inData[10];  // Allocate some space for the Bytes
 byte inByte;   // Where to store the Bytes read
 
+#include <Adafruit_NeoPixel.h>
+ 
+#define PIN 10
+#define N_LEDS 16
+ 
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+ 
 //Included Libraries
 #include <Servo.h>
 #include <Wire.h>
@@ -85,12 +92,14 @@ void setup()
   */
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
-   // encoder.attach(encoderPin);
-  encoder.attach(2, 4, HIGH);
+  encoder.attach(encoderPin);
+  //encoder.attach(2, 4, HIGH);
 
   Serial.begin(115200);
   inputString.reserve(20000);
 //  frontRight.attach(113);
+  strip.begin();
+  StartBlinkers(strip.Color(0,0,255));
 
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
@@ -127,11 +136,29 @@ void handleInput() { //handle serial input if there is any
   posofstart = inputString.indexOf("[");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart);
-  if(angle < 60){
-    angle = 60;
+  if(angle < 55){
+    angle = 55;
   }
-  else if( angle > 120){
-    angle = 120;
+  else if( angle > 106){
+    angle = 106;
+  }
+  if(angle > 55 && angle < 106){
+    TurnOffBlinkers(0);
+  }
+  else if(angle < 56){
+    chaseLeftBlinker(strip.Color(255,255,0));
+  }
+  else if(angle >105){
+    chaseRightBlinker(strip.Color(255,255,0));
+  }
+  if(dir[0] == 'F' || dir[0] == 'K'){
+    Blinkers(strip.Color(0,255,0));
+  }
+  else if(dir[0] == 'B'){
+    Blinkers(strip.Color(255,0,0));
+  }
+  else if(dir[0] == 'S'){
+    Blinkers(0);
   }
     switch (dir[0]) {
       case 'F': //rotate counter-clockwise going forward
@@ -278,7 +305,7 @@ void NormalizeSensValues() {
   IRBR.add(float(Back.getDistance()));
   IRB.add(float(BackRight.getDistance()));
   //USFR.add(frontRight.getDistance());
-  traveledDistance = String((encoder.getDistance()*6.806784082777885667)); 
+  traveledDistance = String((encoder.getDistance()*4)); 
   Serial.println("[V." + traveledDistance + "]");
 
   //USFC.add(front.getDistance());
@@ -305,4 +332,40 @@ void NormalizeSensValues() {
   counter = 0;
 
  }
+}
+
+static void Blinkers(uint32_t c) {
+      strip.setPixelColor(3  , c); // Draw new pixel
+      strip.setPixelColor(4  , c); // Draw new pixel
+      strip.show();
+}
+static void StartBlinkers(uint32_t c) {
+      strip.setPixelColor(0  , 0); // Draw new pixel
+      strip.setPixelColor(1  , 0); // Draw new pixel
+      strip.setPixelColor(3  , c); // Draw new pixel
+      strip.setPixelColor(4  , c); // Draw new pixel
+      strip.setPixelColor(6  , 0); // Draw new pixel
+      strip.setPixelColor(7  , 0); // Draw new pixel
+      strip.show();
+}
+static void chaseLeftBlinker(uint32_t c) {
+      strip.setPixelColor(6  , 0); // Draw new pixel
+      strip.setPixelColor(7  , 0); // Draw new pixel
+      strip.setPixelColor(0  , c); // Draw new pixel
+      strip.setPixelColor(1  , c); // Draw new pixel
+      strip.show();
+}
+static void TurnOffBlinkers(uint32_t c) {
+      strip.setPixelColor(0  , c); // Draw new pixel
+      strip.setPixelColor(1  , c); // Draw new pixel
+      strip.setPixelColor(6  , c); // Draw new pixel
+      strip.setPixelColor(7  , c); // Draw new pixel
+      strip.show();
+}
+static void chaseRightBlinker(uint32_t c) {
+      strip.setPixelColor(0  , 0); // Draw new pixel
+      strip.setPixelColor(1  , 0); // Draw new pixel
+      strip.setPixelColor(7  , c); // Draw new pixel
+      strip.setPixelColor(6  , c); // Draw new pixel
+      strip.show();
 }
