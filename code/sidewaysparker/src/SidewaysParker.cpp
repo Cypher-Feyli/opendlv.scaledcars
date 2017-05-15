@@ -54,10 +54,10 @@ namespace automotive {
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
-           // const double ULTRASONIC_FRONT_RIGHT = 0;
+           // const double ULTRASONIC_FRONT_RIGHT = 3;
             //const double WHEEL_ENCODER = 5;
             const double INFRARED_FRONT_RIGHT = 0;
-            //const double INFRARED_REAR_CENTER = 2;
+            const double INFRARED_REAR_CENTER = 1;
 
             double distanceOld = 0;
             double absPathStart = 0;
@@ -65,6 +65,7 @@ namespace automotive {
 
             int stageMoving = 0;
             int stageMeasuring = 0;
+            int back = 0;
 
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 // 1. Get most recent vehicle data:
@@ -84,7 +85,12 @@ namespace automotive {
                 // double Distance = vd.getAbsTraveledPath();;
                 // cerr << "distance" << distanceOld<< endl; 
                  
-                cerr << "Heeeej" << endl;
+                
+                back = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_CENTER);
+		    cerr << "Back is"<< back << endl;
+		    
+		    cerr << "Heeeej" << endl;
+		    
                 // Create vehicle control data.
                 VehicleControl vc;
                 
@@ -110,14 +116,14 @@ namespace automotive {
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if ((stageMoving >= 15) && (stageMoving < 70)) {
+                if ((stageMoving >= 15) && (stageMoving < 70)|| (back > 9)){
                     // Backwards, steering wheel to the right.
                     vc.setSpeed(-1);
 					                         //45 
                     vc.setSteeringWheelAngle(0.7853981634);
                     stageMoving++;
                 }
-                if ((stageMoving >= 70) && (stageMoving < 100)) {
+                if ((stageMoving >= 70) && (stageMoving < 100)|| (back > 9)){
                     // Backwards, steering wheel to the left.
                     vc.setSpeed(-1);         
 					                         //25
