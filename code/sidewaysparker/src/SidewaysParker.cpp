@@ -116,14 +116,14 @@ namespace automotive {
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if ((stageMoving >= 15) && (stageMoving < 70)|| (back > 9)){
+                if (((stageMoving >= 15) && (stageMoving < 70)|| (back > 9)){
                     // Backwards, steering wheel to the right.
                     vc.setSpeed(-1);
 					                         //45 
                     vc.setSteeringWheelAngle(0.7853981634);
                     stageMoving++;
                 }
-                if ((stageMoving >= 70) && (stageMoving < 100)|| (back > 9)){
+                if (((stageMoving >= 70) && (stageMoving < 100)|| (back > 9)){
                     // Backwards, steering wheel to the left.
                     vc.setSpeed(-1);         
 					                         //25
