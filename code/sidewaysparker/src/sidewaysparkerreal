@@ -1,4 +1,3 @@
-
 /**
  * sidewaysparker - Sample application for realizing a sideways parking car.
  * Copyright (C) 2012 - 2015 Christian Berger
@@ -117,27 +116,27 @@ namespace automotive {
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if (((stageMoving >= 15) && (stageMoving < 60))|| (back > 16)){
+                if (((stageMoving >= 15) && (stageMoving < 70))|| (back > 16)){
                     // Backwards, steering wheel to the right.
                     vc.setSpeed(-1);
 					                         //45 
                     vc.setSteeringWheelAngle(0.7853981634);
                     stageMoving++;
                 }
-                if (((stageMoving >= 60) && (stageMoving < 90))|| (back > 16)){
+                if (((stageMoving >= 70) && (stageMoving < 100))|| (back > 16)){
                     // Backwards, steering wheel to the left.
                     vc.setSpeed(-1);         
 					                         //25
                     vc.setSteeringWheelAngle(-0.436332313);
                     stageMoving++;
                 }
-                if ((stageMoving >= 90) && (stageMoving < 95)) {
+                if ((stageMoving >= 100) && (stageMoving < 105)) {
                     // turn left to straight up
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(-0.436332313);
                     stageMoving++;
                 }                            
-                  if ((stageMoving >= 95) && (stageMoving < 120)) {
+                  if ((stageMoving >= 105) && (stageMoving < 130)) {
                     //  turn right to straight up.
                     vc.setSpeed(1);
 					                         // 10
