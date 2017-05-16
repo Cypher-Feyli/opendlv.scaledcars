@@ -191,7 +191,7 @@ namespace automotive {
                 Point left;
                 left.y = y;
                 left.x = -1;
-                  for(int x = (m_image->width/2); x > 0; x-=2) {
+                  for(int x = (m_image->width/2); x > 0; x--) {
 
                     //http://answers.opencv.org/question/1870/find-pixel-color-out-of-cvmat-on-specific-position/
                   // here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
@@ -211,7 +211,7 @@ namespace automotive {
                 Point right;
                 right.y = y;
                 right.x = -1;
-                for(int x = (m_image->width/2); x < m_image->width; x+=2) {
+                for(int x = (m_image->width/2); x < m_image->width; x++) {
                     pixelRight = canny_image.at<uchar>(Point(x, y));
                     if (pixelRight > 150)  {
                         right.x = x;
@@ -226,7 +226,7 @@ namespace automotive {
                         // grayscaled image so have to make the lines white
                         Scalar green = CV_RGB(255, 255, 255);
 
-                        line(croppedImage, Point(m_image->width/2, y), left, green);
+                        line(canny_image, Point(m_image->width/2, y), left, green);
 
                       //  stringstream sstr;
                       //  sstr << (m_image->width/2 - left.x);
@@ -238,7 +238,7 @@ namespace automotive {
 
                         Scalar red = CV_RGB(255, 255, 255);
 
-                        line(croppedImage, Point(m_image->width/2, y), right, red);
+                        line(canny_image, Point(m_image->width/2, y), right, red);
 
                       //  stringstream sstr;
                       //  sstr << (right.x - m_image->width/2);
@@ -278,7 +278,7 @@ namespace automotive {
             }
 
             TimeStamp afterImageProcessing;
-          //  cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
+            cerr << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeImageProcessing.toMicroseconds())/1000.0 << "ms." << endl;
 
             // Show resulting features.
             if (m_debug) {
