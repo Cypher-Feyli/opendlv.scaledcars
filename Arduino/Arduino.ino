@@ -16,11 +16,11 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 #include <Smartcar.h>
 #include "RunningMedian.h"
 
-RunningMedian IRB = RunningMedian(5);
-RunningMedian IRBR = RunningMedian(5);
-RunningMedian IRFR = RunningMedian(5);
-RunningMedian USFR = RunningMedian(5);
-RunningMedian USFC = RunningMedian(5);
+RunningMedian IRB = RunningMedian(3);
+RunningMedian IRBR = RunningMedian(3);
+RunningMedian IRFR = RunningMedian(3);
+RunningMedian USFR = RunningMedian(3);
+RunningMedian USFC = RunningMedian(3);
 
 String FrontRightIR = "";
 String BackIR = "";
@@ -91,16 +91,18 @@ void setup()
   frontRight.setRange(RANGE);
   frontRight.setPingDelay(70); //uncomment if u want to use custom measurement range
   */
+  
   myServo.attach(3);      //Attach Steering Servo to PWM Pin 2
   CarMotor.attach(5);
   encoder.attach(2);
-  //encoder.attach(2, 4, HIGH);
+  //encoder.attach(2, 4, HIGH); Commented out because of we dont need the output B from the wheel encoder.
 
   Serial.begin(115200);
   inputString.reserve(20000);
 //  frontRight.attach(113);
   strip.begin();
-  StartBlinkers(strip.Color(0,0,255));
+  //While the handshake is running the middle LEDs (3,4) turns blue.
+  handshakeLights(strip.Color(0,0,255));
 
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
@@ -139,31 +141,35 @@ void handleInput() { //handle serial input if there is any
   posofend = inputString.indexOf("]");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart, posofend);
-  if(angle > 45){
-    
+  if(angle > 55){
+
+  //Two statements to sort out incorrect angles which cannot be executed if not changed.
   if(angle < 60){
     angle = 60;
   }
   else if( angle > 101){
     angle = 101;
   }
+
+  //Depending on the angle of the steering and the direction that the car is moving the NeoPixels will be drawn with different colors
+  //to indicate what driving commands the car is executing.
   if(angle > 60 && angle < 101){
     TurnOffBlinkers(0);
   }
   else if(angle < 61){
-    chaseLeftBlinker(strip.Color(255,150,0));
+    drawLeftBlinker(strip.Color(255,150,0));
   }
   else if(angle >100){
-    chaseRightBlinker(strip.Color(255,150,0));
+    drawRightBlinker(strip.Color(255,150,0));
   }
   if(dir[0] == 'F' || dir[0] == 'K'){
-    Blinkers(strip.Color(0,255,0));
+    directionLights(strip.Color(0,255,0));
   }
   else if(dir[0] == 'B'){
-    Blinkers(strip.Color(255,0,0));
+    directionLights(strip.Color(255,0,0));
   }
   else if(dir[0] == 'S'){
-    Blinkers(strip.Color(32,32,32));
+    directionLights(strip.Color(32,32,32));
   }
     switch (dir[0]) {
       case 'F': //rotate counter-clockwise going forward
@@ -215,6 +221,7 @@ void handleInput() { //handle serial input if there is any
   }
   }
 }
+//Handshake which only sends the string [H] until proper connection has been established with the proxy.
 void establishContact() {
   while (Serial.available() <= 0) {
     Serial.println("[H]");   // send an initial string
@@ -304,16 +311,13 @@ void SteerCar() {
 
 
 void NormalizeSensValues() {
-  //school testing
-
   IRFR.add(float(FrontRight.getDistance()));
   IRBR.add(float(Back.getDistance()));
   IRB.add(float(BackRight.getDistance()));
   //USFR.add(frontRight.getDistance());
+  //USFC.add(front.getDistance());
   traveledDistance = String((encoder.getDistance()*4.2)); 
   Serial.println("[V." + traveledDistance + "]");
-
-  //USFC.add(front.getDistance());
   counter++;
   if(counter == 3){
   
@@ -329,22 +333,26 @@ void NormalizeSensValues() {
   //USFR.clear();
   //get distance traveled since begin() in setup()
 
-  //Serial.println("[IR.22,44;66]");
+  //Serial.println("[IR.22,44;66]"); This is for testing purposes
 
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
-  Serial.println("[US.100]");
+  Serial.println("[US.100]"); 
+  // Printing ultrasonic as 100 every time because we dont have functioning ultrasonic at the moment.
   //Serial.println("[US." + usFrontRight + "]");
   counter = 0;
 
  }
 }
 
-static void Blinkers(uint32_t c) {
+//Functions for drawing the LEDs on the car to the color which is inputed when calling the functions.
+//Draws the middle LEDs.
+static void directionLights(uint32_t c) {
       strip.setPixelColor(3  , c); // Draw new pixel
       strip.setPixelColor(4  , c); // Draw new pixel
       strip.show();
 }
-static void StartBlinkers(uint32_t c) {
+//Draws the middle LEDs.
+static void handshakeLights(uint32_t c) {
       strip.setPixelColor(0  , 0); // Draw new pixel
       strip.setPixelColor(1  , 0); // Draw new pixel
       strip.setPixelColor(3  , c); // Draw new pixel
@@ -353,26 +361,29 @@ static void StartBlinkers(uint32_t c) {
       strip.setPixelColor(7  , 0); // Draw new pixel
       strip.show();
 }
-static void chaseLeftBlinker(uint32_t c) {
+//Draws the left blinkers.
+static void drawLeftBlinker(uint32_t c) {
       strip.setPixelColor(6  , 0); // Draw new pixel
       strip.setPixelColor(7  , 0); // Draw new pixel
       strip.setPixelColor(0  , c); // Draw new pixel
       strip.setPixelColor(1  , c); // Draw new pixel
       strip.show();
 }
-static void TurnOffBlinkers(uint32_t c) {
+//Draws the right blinkers.
+static void drawRightBlinker(uint32_t c) {
+      strip.setPixelColor(6  , c); // Draw new pixel
+      strip.setPixelColor(7  , c); // Draw new pixel
+      strip.setPixelColor(0  , 0); // Draw new pixel
+      strip.setPixelColor(1  , 0); // Draw new pixel
+      strip.show();
+}
+//Draws all the blinkers pixels
+static void turnOffBlinkers(uint32_t c) {
       strip.setPixelColor(0  , 0); // Draw new pixel
       strip.setPixelColor(1  , 0); // Draw new pixel
       strip.setPixelColor(3  , c); // Draw new pixel
       strip.setPixelColor(4  , c); // Draw new pixel
       strip.setPixelColor(6  , 0); // Draw new pixel
       strip.setPixelColor(7  , 0); // Draw new pixel
-      strip.show();
-}
-static void chaseRightBlinker(uint32_t c) {
-      strip.setPixelColor(0  , 0); // Draw new pixel
-      strip.setPixelColor(1  , 0); // Draw new pixel
-      strip.setPixelColor(7  , c); // Draw new pixel
-      strip.setPixelColor(6  , c); // Draw new pixel
       strip.show();
 }
