@@ -141,7 +141,7 @@ void handleInput() { //handle serial input if there is any
   posofend = inputString.indexOf("]");
   inputString.substring(posofstart+1,posofstart+2).toCharArray(dir, 2);
   angle = SetAngle(posofstart, posofend);
-  if(angle > 55){
+  if(angle > 20){
 
   //Two statements to sort out incorrect angles which cannot be executed if not changed.
   if(angle < 60){
@@ -378,7 +378,7 @@ static void drawRightBlinker(uint32_t c) {
       strip.show();
 }
 //Draws all the blinkers pixels
-static void turnOffBlinkers(uint32_t c) {
+static void TurnOffBlinkers(uint32_t c) {
       strip.setPixelColor(0  , 0); // Draw new pixel
       strip.setPixelColor(1  , 0); // Draw new pixel
       strip.setPixelColor(3  , c); // Draw new pixel
