@@ -51,8 +51,8 @@ namespace automotive {
         const int32_t INFRARED_FRONT_RIGHT = 0;
         const int32_t INFRARED_REAR_RIGHT = 2;
 
-        const double OVERTAKING_DISTANCE = 5.5;
-        const double HEADING_PARALLEL = 0.04;
+        const double OVERTAKING_DISTANCE = 45;
+        const double HEADING_PARALLEL = 2;
 
         // Overall state machines for moving and measuring.
         enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
@@ -389,7 +389,7 @@ namespace automotive {
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
                         m_vehicleControl.setSpeed(1.3);
-                       m_vehicleControl.setSteeringWheelAngle(0.52);
+                       m_vehicleControl.setSteeringWheelAngle(0.17);
                        cerr << "TO_RIGHT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
                         
 
@@ -472,9 +472,9 @@ namespace automotive {
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
                         // Find end of object.
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
+                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
 
-                        if (distanceToObstacle < 0) {
+                        if (distanceToObstacle <= 0) {
                             // Move to right lane again.
                             stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
 
