@@ -59,8 +59,8 @@ namespace automotive {
             const int32_t INFRARED_FRONT_RIGHT = 0;
             const int32_t INFRARED_REAR_RIGHT = 2;
 
-            const double OVERTAKING_DISTANCE = 5.5;
-            const double HEADING_PARALLEL = 0.04;
+            const double OVERTAKING_DISTANCE = 45;
+            const double HEADING_PARALLEL = 2;
 
             // Overall state machines for moving and measuring.
             enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
@@ -100,7 +100,7 @@ namespace automotive {
                     else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
                         // Move to the left lane: Turn left part until both IRs see something.
                         vc.setSpeed(1);
-                        vc.setSteeringWheelAngle(-.52);
+                        vc.setSteeringWheelAngle(-0.52);
                         cout << "TO_LEFT_LANE_LEFT_TURN    "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
@@ -111,7 +111,7 @@ namespace automotive {
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                         vc.setSpeed(.6);
-                        vc.setSteeringWheelAngle(.52);
+                        vc.setSteeringWheelAngle(0.52);
                         cout << "TO_LEFT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
 
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
@@ -130,7 +130,7 @@ namespace automotive {
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
                         vc.setSpeed(1.3);
-                        vc.setSteeringWheelAngle(-.52);
+                        vc.setSteeringWheelAngle(0.17);
                         cout << "TO_RIGHT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
                         stageToRightLaneRightTurn--;
                         if (stageToRightLaneRightTurn == -13) {
@@ -143,7 +143,7 @@ namespace automotive {
                         
                         
                         vc.setSpeed(2);
-                        vc.setSteeringWheelAngle(-.52);
+                        vc.setSteeringWheelAngle(-0.52);
                      
                         stageToRightLaneLeftTurn = 0;
                         if (stageToRightLaneLeftTurn == 0) {
@@ -206,9 +206,9 @@ namespace automotive {
                     }
                     else if (stageMeasuring == END_OF_OBJECT) {
                         // Find end of object.
-                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
+                        distanceToObstacle = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
 
-                        if (distanceToObstacle < 0) {
+                        if (distanceToObstacle <= 0) {
                             // Move to right lane again.
                             stageMoving = TO_RIGHT_LANE_RIGHT_TURN;
 
