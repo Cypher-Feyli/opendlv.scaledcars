@@ -52,7 +52,7 @@ namespace automotive {
         const int32_t INFRARED_REAR_RIGHT = 2;
 
         const double OVERTAKING_DISTANCE = 45;
-        const double HEADING_PARALLEL = 2;
+        const double HEADING_PARALLEL = 6;
 
         // Overall state machines for moving and measuring.
         enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
