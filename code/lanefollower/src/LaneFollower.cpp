@@ -196,7 +196,7 @@ namespace automotive {
            // this loop first goes through the bottom of the image - 8 and ends at imageheight 0.
             // starting the loop with the integer 184 and continue the loop as long as
             // y is bigger than 0, y decreases with 10 every loop
-            for(int32_t y = 184; y > 104; y -= 10) {
+            for(int32_t y = 184; y > 164; y -= 10) {
                 // Search from middle to the left:
                 // cvscalar is an array that stores integers representing for example the color [210,0,0] red
                 //CvScalar pixelLeft;
