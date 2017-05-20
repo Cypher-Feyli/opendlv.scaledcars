@@ -33,6 +33,7 @@
 
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+ #include <cmath>
 
 
 
@@ -51,8 +52,8 @@ namespace automotive {
         const int32_t INFRARED_FRONT_RIGHT = 0;
         const int32_t INFRARED_REAR_RIGHT = 2;
 
-        const double OVERTAKING_DISTANCE = 45;
-        const double HEADING_PARALLEL = 6;
+        const double OVERTAKING_DISTANCE = 5.5;
+        const double HEADING_PARALLEL = 0.04;
 
         // Overall state machines for moving and measuring.
         enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
@@ -69,7 +70,9 @@ namespace automotive {
         double distanceToObstacle = 0;
         double distanceToObstacleOld = 0;
         static bool useRightLaneMarking = true;
-
+        int stopped = 0;
+         bool stopline = false;
+         int forwa =0;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
             m_hasAttachedToSharedImageMemory(false),
@@ -150,9 +153,25 @@ namespace automotive {
         // int setSpeed(double error, int previous speed){
      //   if(error)
  //   }
+    bool LaneFollower::intersectionDetector(Mat mat){
+        bool detected = false;
+          vector<Vec2f> lines;
+           // detect lines
+            HoughLines(mat, lines, 1, CV_PI/180, 150, 0, 0 );
+         
+            // draw lines
+            for( size_t i = 0; i < lines.size(); i++ )
+            {
+                double  theta = lines[i][1];
+                if( theta>CV_PI/180*80 && theta<CV_PI/180*100){
+               
+                cerr << "intersection detected" << endl;
+                detected = true;
 
-  
-  
+             }
+            
+            }return detected;
+       }
        
         void LaneFollower::processImage() {
              //canny edge detection(http://docs.opencv.org/2.4/modules/imgproc/doc/feature_detection.html?highlight=canny)
@@ -162,27 +181,22 @@ namespace automotive {
             Mat croppedImage = unprocessed(cropArea);
             cvtColor( croppedImage, gray, CV_BGR2GRAY );
             Canny( gray, canny_image, 90, 150, 3);
-            /*vector<Vec4i> lines;
-            HoughLinesP(canny_image, lines, 1, CV_PI/180, 50, 50, 10 );
-            for( size_t i = 0; i < lines.size(); i++ )
-            {
-              Vec4i l = lines[i];
-              line( canny_image, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,255,255), 3, CV_AA);
-            }*/
+            
            
-
-           // static bool useRightLaneMarking = true;
             double e = 0;
+            if (stopline==false){
+             stopped = 0;
+        }
 
             const int32_t CONTROL_SCANLINE = 174; 
-            const int32_t distance = 280;
+            const int32_t distance = 250;
 
 
             TimeStamp beforeImageProcessing;
            // this loop first goes through the bottom of the image - 8 and ends at imageheight 0.
             // starting the loop with the integer 184 and continue the loop as long as
             // y is bigger than 0, y decreases with 10 every loop
-            for(int32_t y = 184; y > 0; y -= 10) {
+            for(int32_t y = 184; y > 104; y -= 10) {
                 // Search from middle to the left:
                 // cvscalar is an array that stores integers representing for example the color [210,0,0] red
                 //CvScalar pixelLeft;
@@ -197,8 +211,8 @@ namespace automotive {
                   // here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
                     pixelLeft = canny_image.at<uchar>(Point(x, y));
                    // pixelLeft = cvGet2D(newImage, y, x);
-                            // when finding a non black pixel, break the loop and store the x value which is the vertical pixel location 
-                     if (pixelLeft > 150)  {
+                   // when finding a non black pixel, break the loop and store the x value which is the vertical pixel location 
+                     if (pixelLeft > 177)  {
                         left.x = x;
                         break;
                     }
@@ -213,9 +227,17 @@ namespace automotive {
                 right.x = -1;
                 for(int x = (m_image->width/2); x < m_image->width; x++) {
                     pixelRight = canny_image.at<uchar>(Point(x, y));
-                    if (pixelRight > 150)  {
+                    if (pixelRight > 177)  {
                         right.x = x;
                         break;
+                    }
+                }
+                if(((right.x<10&&right.x>-1) || (left.x<10&&left.x>-1))&& (!stopline) ){
+                    if(intersectionDetector(canny_image) == true){
+                        stopline = true;
+                        cerr << "stooooooooooooooooooooooopppppppp"  << endl;
+                        stopped = 100;
+
                     }
                 }
 
@@ -224,9 +246,9 @@ namespace automotive {
                       //  CvScalar green = CV_RGB(0, 255, 0);
                      //   cvLine(m_image, cvPoint(m_image->width/2, y), left, green, 1, 8);
                         // grayscaled image so have to make the lines white
-                        Scalar green = CV_RGB(255, 255, 255);
+                        Scalar green = CV_RGB(0, 255, 0);
 
-                        line(canny_image, Point(m_image->width/2, y), left, green);
+                        line(croppedImage, Point(m_image->width/2, y), left, green);
 
                       //  stringstream sstr;
                       //  sstr << (m_image->width/2 - left.x);
@@ -236,9 +258,9 @@ namespace automotive {
                        // CvScalar red = CV_RGB(255, 0, 0);
                      //   cvLine(m_image, cvPoint(m_image->width/2, y), right, red, 1, 8);
 
-                        Scalar red = CV_RGB(255, 255, 255);
+                        Scalar red = CV_RGB(255, 0, 0);
 
-                        line(canny_image, Point(m_image->width/2, y), right, red);
+                        line(croppedImage, Point(m_image->width/2, y), right, red);
 
                       //  stringstream sstr;
                       //  sstr << (right.x - m_image->width/2);
@@ -330,8 +352,26 @@ namespace automotive {
 
 
             // Go forward.
+           if(stopline == true && stopped >0){
+
+            m_vehicleControl.setSpeed(0);
+            m_vehicleControl.setSteeringWheelAngle(0);
+            stopped--;
+            cerr << stopped  << endl;
+            forwa = 100;
+           }
+           else if(stopline == true && forwa >0){
+             m_vehicleControl.setSpeed(1);
+             m_vehicleControl.setSteeringWheelAngle(0);
+             cerr << forwa << endl;
+             forwa--;
+
+           }else{
+
+            stopline=false;
             m_vehicleControl.setSpeed(2);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+          }
         }
 
             void LaneFollower::overtaker(){
