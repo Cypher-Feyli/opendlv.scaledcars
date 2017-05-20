@@ -157,6 +157,7 @@ namespace automotive {
         bool detected = false;
           vector<Vec2f> lines;
            // detect lines
+          cerr << "stooooooooooooooooooooooopppppppp"  << endl;
             HoughLines(mat, lines, 1, CV_PI/180, 150, 0, 0 );
          
             // draw lines
@@ -196,7 +197,7 @@ namespace automotive {
            // this loop first goes through the bottom of the image - 8 and ends at imageheight 0.
             // starting the loop with the integer 184 and continue the loop as long as
             // y is bigger than 0, y decreases with 10 every loop
-            for(int32_t y = 184; y > 164; y -= 10) {
+            for(int32_t y = 184; y > 40; y -= 10) {
                 // Search from middle to the left:
                 // cvscalar is an array that stores integers representing for example the color [210,0,0] red
                 //CvScalar pixelLeft;
@@ -232,7 +233,7 @@ namespace automotive {
                         break;
                     }
                 }
-                if(((right.x<10&&right.x>-1) || (left.x<10&&left.x>-1))&& (!stopline) ){
+                if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x<3-(m_image->width/2)&&left.x>-1))&& (!stopline) ){
                     if(intersectionDetector(canny_image) == true){
                         stopline = true;
                         cerr << "stooooooooooooooooooooooopppppppp"  << endl;
@@ -358,7 +359,7 @@ namespace automotive {
             m_vehicleControl.setSteeringWheelAngle(0);
             stopped--;
             cerr << stopped  << endl;
-            forwa = 100;
+            forwa = 50;
            }
            else if(stopline == true && forwa >0){
              m_vehicleControl.setSpeed(1);
@@ -374,7 +375,7 @@ namespace automotive {
           }
         }
 
-                  void LaneFollower::overtaker(){
+            void LaneFollower::overtaker(){
                  // Parameters for overtaking.
             
 
@@ -563,7 +564,7 @@ namespace automotive {
                 }//if (sbd.getValueForKey_MapOfDistances(3)>2){
                 //overtaker();
           //  }
-                //    overtaker();
+                   overtaker();
                 // Create container for finally sending the set values for the control algorithm.
                 Container c2(m_vehicleControl);
                 // Send container.
