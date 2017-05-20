@@ -233,7 +233,7 @@ namespace automotive {
                         break;
                     }
                 }
-                if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x<3-(m_image->width/2)&&left.x>-1))&& (!stopline) ){
+                 if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x>(m_image->width/2)-3&&left.x>-1))&& (!stopline) ){
                     if(intersectionDetector(canny_image) == true){
                         stopline = true;
                         cerr << "stooooooooooooooooooooooopppppppp"  << endl;
