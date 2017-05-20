@@ -34,6 +34,7 @@ namespace automotive {
     namespace miniature {
 
         using namespace std;
+        using namespace cv;
 
         /**
          * This class is an exemplary skeleton for processing video data.
@@ -100,6 +101,7 @@ namespace automotive {
 
                 void processImage();
 		void overtaker();
+		bool intersectionDetector(Mat mat);
 
         };
 
