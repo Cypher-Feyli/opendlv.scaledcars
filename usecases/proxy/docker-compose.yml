@@ -26,7 +26,7 @@ services:
         ipc: host
         volumes:
             - .:/opt/opendlv.core.configuration
-        command: "/opt/od4/bin/odsupercomponent --cid=${CID} --verbose=1 --configuration=/opt/opendlv.core.configuration/configuration --freq=20"
+        command: "/opt/od4/bin/odsupercomponent --cid=${CID} --verbose=1 --configuration=/opt/opendlv.core.configuration/configuration --freq=40"
 
    # Micro-service for proxy scenario.
     proxy:
@@ -43,7 +43,7 @@ services:
             - "/dev/video1:/dev/video0"
         depends_on:
             - odsupercomponent
-        command: "/opt/opendlv.scaledcars/bin/miniature/proxy -rm=true --privileged=true --verbose=1 --cid=${CID} --freq=20"
+        command: "/opt/opendlv.scaledcars/bin/miniature/proxy -rm=true --privileged=true --verbose=1 --cid=${CID} --freq=40"
     # Micro-service for odsimvehicle.
 
    #Micro-service for lanedtecter scenario.
@@ -58,4 +58,5 @@ services:
         - ./DIT-168:/opt/config
         depends_on:
             - odsupercomponent
-        command: " /opt/opendlv.scaledcars/bin/miniature/lanefollower --verbose=1  --cid=${CID} --freq=20 -e DISPLAY=$DISPLAY"
+            - proxy
+        command: bash -c "sleep 3; /opt/opendlv.scaledcars/bin/miniature/overtaker --verbose=1  --cid=${CID} --freq=40 -e DISPLAY=$DISPLAY"
