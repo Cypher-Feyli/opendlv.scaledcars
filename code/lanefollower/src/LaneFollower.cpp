@@ -147,12 +147,7 @@ namespace automotive {
             }
             return retVal;
         }
-     
-//void LaneFollower::detectWhite() {
-
-        // int setSpeed(double error, int previous speed){
-     //   if(error)
- //   }
+    //inspired partially by http://opencvexamples.blogspot.com/2013/10/line-detection-by-hough-line-transform.html
     bool LaneFollower::intersectionDetector(Mat mat){
         bool detected = false;
           vector<Vec2f> lines;
