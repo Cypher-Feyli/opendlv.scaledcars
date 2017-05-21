@@ -53,7 +53,9 @@ void DataParser::PackageData(const string vals){
         done = true;
     }
 }
-//This method will handle any bytes received from the low level SerialPort. 
+/* 
+ * This method will handle any bytes received from the low level SerialPort.
+ */
 void DataParser::nextString(const string &s) {
     cerr << "Received " << s.length() << " bytes containing '" << s << "'" << endl;
     char* chr = strdup(s.c_str());
