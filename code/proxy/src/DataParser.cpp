@@ -31,7 +31,6 @@ using namespace std;
 void DataParser::PackageData(const string vals){
     if(vals.at(0) == 'U'){
         int FirstDelim = vals.find(".");
-        //mapValues.insert(pair<string,int>("USFR",stoi(vals.substr(FirstDelim+1,secondDelim))));
         mapValues.insert ( pair<uint32_t,double>((i+3),stod(vals.substr(FirstDelim+1))));
         usvals = true;
     }
