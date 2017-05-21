@@ -191,6 +191,8 @@ namespace automotive {
 
             const int32_t CONTROL_SCANLINE = 174; 
             const int32_t distance = 250;
+             int xLeft = 0;
+            int xRight = 0;
 
 
             TimeStamp beforeImageProcessing;
@@ -198,6 +200,16 @@ namespace automotive {
             // starting the loop with the integer 184 and continue the loop as long as
             // y is bigger than 0, y decreases with 10 every loop
             for(int32_t y = 184; y > 40; y -= 10) {
+                
+                if(y==174){
+                    xLeft = 0;
+                    xRight = m_image->width;
+                }else{
+                    xLeft = (m_image->width/2)-4;
+                    xRight = (m_image->width/2)+4;
+
+                }
+
                 // Search from middle to the left:
                 // cvscalar is an array that stores integers representing for example the color [210,0,0] red
                 //CvScalar pixelLeft;
@@ -206,7 +218,7 @@ namespace automotive {
                 Point left;
                 left.y = y;
                 left.x = -1;
-                  for(int x = (m_image->width/2); x > 0; x--) {
+                  for(int x = (m_image->width/2); x > xLeft; x--) {
 
                     //http://answers.opencv.org/question/1870/find-pixel-color-out-of-cvmat-on-specific-position/
                   // here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
@@ -226,14 +238,14 @@ namespace automotive {
                 Point right;
                 right.y = y;
                 right.x = -1;
-                for(int x = (m_image->width/2); x < m_image->width; x++) {
+                for(int x = (m_image->width/2); x < xRight; x++) {
                     pixelRight = canny_image.at<uchar>(Point(x, y));
                     if (pixelRight > 177)  {
                         right.x = x;
                         break;
                     }
                 }
-                 if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x>(m_image->width/2)-3&&left.x>-1))&& (!stopline) ){
+                if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x>(m_image->width/2)-3&&left.x>-1))&& (!stopline) ){
                     if(intersectionDetector(canny_image) == true){
                         stopline = true;
                         cerr << "stooooooooooooooooooooooopppppppp"  << endl;
