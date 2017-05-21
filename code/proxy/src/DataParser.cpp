@@ -22,7 +22,12 @@ double dist = 0;
 map<uint32_t, double> mapValues;
 using namespace std;
 
-// Your class needs to implement the method void nextString(const std::string &s).
+/*
+ * Function which takes parameter vals and checks what type of package it is. If it is a US or IR packet
+ * we insert it to the map. If it's a handshake we set handshake to true, and if it is a wheel encoder packet we
+ * set the variable dist to what we received from the lower level board. If we received both US and IR values
+ * we set done to true indicating that the sensorBoard map is done.
+ */
 void DataParser::PackageData(const string vals){
     if(vals.at(0) == 'U'){
         int FirstDelim = vals.find(".");
