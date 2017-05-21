@@ -57,6 +57,7 @@ namespace automotive {
         using namespace odcore::base;
         using namespace odcore::data;
         using namespace odtools::recorder;
+        //Used when establishing serial connection
         string SERIAL_PORT;
         uint32_t BAUD_RATE;
         Proxy::Proxy(const int32_t &argc, char **argv) :
@@ -103,6 +104,7 @@ namespace automotive {
             const uint32_t WIDTH = getKeyValueConfiguration().getValue<uint32_t>("proxy.camera.width");
             const uint32_t HEIGHT = getKeyValueConfiguration().getValue<uint32_t>("proxy.camera.height");
             const uint32_t BPP = getKeyValueConfiguration().getValue<uint32_t>("proxy.camera.bpp");
+            //adjustable values in the config for serial port and baud rate.
             SERIAL_PORT = getKeyValueConfiguration().getValue<string>("proxy.actuator.serialport");
             BAUD_RATE = getKeyValueConfiguration().getValue<uint32_t>("proxy.sensor.serialspeed");
             const bool DEBUG = getKeyValueConfiguration().getValue< bool >("proxy.camera.debug") == 1;
@@ -142,7 +144,7 @@ namespace automotive {
 
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Proxy::body() {
-
+            //Uses open da vincis library http://opendavinci.cse.chalmers.se/api/classodcore_1_1wrapper_1_1SerialPort.html
             std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
             DataParser handler;
             serial->setStringListener(&handler);
@@ -166,13 +168,14 @@ namespace automotive {
                     distribute(c);
                     captureCounter++;
                 }
+                //Waiting till handshake is done between the odroid and the arduino
                 while(!handler.Handshake()){
                     cerr << "initializing handshake" << endl;
                     odcore::base::Thread::usleepFor(10 * TENTH_SECOND);
                 };
                 uint32_t sensors=0;
-
-                if(captureCounter > 50){
+                //Just making sure each sensor had time to setup on the arduino
+                if(captureCounter > 100){
                     if(handler.DataDoneSBD()){  
                         //test printing all values from sensorboard
                         map<uint32_t, double> m = handler.GetValuesSBD();
@@ -200,10 +203,10 @@ namespace automotive {
                     double speed = vehicleControlData.getSpeed(); 
                     double Angle = vehicleControlData.getSteeringWheelAngle();
                     int speed1 = (int) speed;
-
+                    //since the car axis is not straight at angle 90 we adjusted this to 81.
                     int Angle1 = (int) 81  + (Angle * (180 / 3.1415926535)); // Cast angle to int
-                    cerr << "qweqwe"<<Angle1 << endl;
-                    cerr << "dir" << speed1 << endl;
+                    cerr << "Angle is: "<<Angle1 << endl;
+                    cerr << "direction is: " << speed1 << endl;
                     std::string angleString = std::to_string(Angle1);
                     if(speed1 >= 1){ 
                         serial->send("[F" + angleString + "]");
@@ -228,4 +231,5 @@ namespace automotive {
 
     }
 } // automotive::miniature
+
 
