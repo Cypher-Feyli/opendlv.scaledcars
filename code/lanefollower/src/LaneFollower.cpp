@@ -370,7 +370,8 @@ namespace automotive {
            }
            else if(stopline == true && forwa >0){
              m_vehicleControl.setSpeed(1);
-             m_vehicleControl.setSteeringWheelAngle(0);
+            // adjusting the angle for the real car
+             m_vehicleControl.setSteeringWheelAngle(-0.12);
              cerr << forwa << endl;
              forwa--;
 
