@@ -55,9 +55,9 @@ namespace automotive {
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SidewaysParker::body() {
            // const double ULTRASONIC_FRONT_RIGHT = 0;
-            //const double WHEEL_ENCODER = 5;
+           
             const double INFRARED_FRONT_RIGHT = 0;
-            //const double INFRARED_REAR_CENTER = 2;
+            const double INFRARED_REAR_CENTER = 1;
 
             double distanceOld = 0;
             double absPathStart = 0;
@@ -65,6 +65,7 @@ namespace automotive {
 
             int stageMoving = 0;
             int stageMeasuring = 0;
+            int back = 0;
 
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 // 1. Get most recent vehicle data:
@@ -74,20 +75,17 @@ namespace automotive {
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-               //0 front right
-               //1 back 
-               //
+               
+              
 
-                 //sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT)
-                // double value = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
-                  //cerr << "value" << Distance << endl;
-                // double Distance = vd.getAbsTraveledPath();;
-                // cerr << "distance" << distanceOld<< endl; 
+                       
                  
-                cerr << "Heeeej" << endl;
+                 back = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_CENTER);
+                   cerr << "Back is"<< back << endl;
                 // Create vehicle control data.
                 VehicleControl vc;
                 
+                //print out informations
                 cerr << "StageMoving " << stageMoving << endl;
                 cerr << "Sensordata " << sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                 cerr << "StageMeasuring" << stageMeasuring << endl;
@@ -110,38 +108,47 @@ namespace automotive {
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
                 }
-                if ((stageMoving >= 15) && (stageMoving < 70)) {
+                if ((stageMoving >= 15) && (stageMoving < 35)) {
                     // Backwards, steering wheel to the right.
                     vc.setSpeed(-1);
-					                         //45 
-                    vc.setSteeringWheelAngle(0.7853981634);
+                         //Using radians=turn right 25 degree 
+                    vc.setSteeringWheelAngle(0.436332313);
                     stageMoving++;
                 }
-                if ((stageMoving >= 70) && (stageMoving < 100)) {
+                if ((stageMoving >= 35) && (stageMoving < 80)) {
+                             
                     // Backwards, steering wheel to the left.
                     vc.setSpeed(-1);         
-					                         //25
+                        //Using radians =turn left 25 degree
                     vc.setSteeringWheelAngle(-0.436332313);
                     stageMoving++;
+                 
+                        // If INFRARED_REAR_CENTER smaller than 13 cm ,switch to next stagemoving.
+                      if (back < 13) {
+                     
+                   stageMoving =80;
+                 
+                  }
                 }
-                if ((stageMoving >= 100) && (stageMoving < 105)) {
+                if ((stageMoving >= 80) && (stageMoving < 100)) {
                     // turn left to straight up
                     vc.setSpeed(0);
-                    vc.setSteeringWheelAngle(-0.436332313);
+                                            //Using radians=turn left 10 degree 
+                    vc.setSteeringWheelAngle(-0.1745329252);
                     stageMoving++;
                 }                            
-                  if ((stageMoving >= 105) && (stageMoving < 130)) {
+                  if ((stageMoving >= 100) && (stageMoving < 110)) {
                     //  turn right to straight up.
                     vc.setSpeed(1);
-					                         // 10
+                      //Using radians=turn right 10 degree
                     vc.setSteeringWheelAngle(0.1745329252);
                     stageMoving++;
 
 
 
                 }
-                                   //220  //260 straight
-                if (stageMoving >= 130) {
+                                   
+                if (stageMoving >= 110) {
                     // Stop.
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
@@ -161,34 +168,36 @@ namespace automotive {
                 switch (stageMeasuring) {
                     case 0:
                         {
-                            // Initialize measurement.
+                            // Initialize measurement.get current value from IFR on the real car.
                             distanceOld =sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                             stageMeasuring++;
                         }
                     break;
                     case 1:
                         {
-                            // Checking for sequence +, -. US does not obstacle ,start value for sensor is -1.
+                            // Checking for sequence +, -.  the minimum value of IF sensor is 0 on the real car.
                             if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) <= 0)) {
-                                // Found sequence +, -.
+                                // Found sequence +, -.find start of gap
                                     
                                 stageMeasuring = 2;
-                                //find start of gap
-
+                                
+                                 //get start of traveledpath data from WHEEL_ENCODER
                                 absPathStart = vd.getAbsTraveledPath();
                             }
+                             //update current value from IFR sensor
                             distanceOld = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                             
                         }
                     break;
                     case 2:
                         {
-                            // Checking for sequence -, +. real car distanceold big than 0
+                            // Checking for sequence -, +. 
+                              //the minimum value of IF sensor is 0 on the real car.
                             if ((distanceOld <= 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0)) {
-                                // Found sequence -, +.
+                                // Found sequence -, +.// find end of gap  
                                 stageMeasuring = 1;
-                                // find end of gap   IF  find obstacle ,value bigger than 0.
-
+                                 
+                                              // get end of traveledpath data from WHEEL_ENCODER
                                 absPathEnd = vd.getAbsTraveledPath();
                               
 
@@ -196,12 +205,13 @@ namespace automotive {
                                  
                                 cerr << "Size = " << GAP_SIZE << endl;
 
-                                                          //set parking gap 
+                                                          //set parking gap 50 cm 
                                 if ((stageMoving < 1) && (GAP_SIZE > 50)) {
                                     //do parking
                                     stageMoving = 1;
                                 }
                             }
+                            //update current value from IFR sensor
                             distanceOld = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
                         }
                     break;

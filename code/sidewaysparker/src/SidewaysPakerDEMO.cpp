@@ -166,13 +166,13 @@ namespace automotive {
                     break;
                     case 1:
                         {
-                            // Checking for sequence +, -. on the real car value of IF sensor bigger or equal 0 
+                            // Checking for sequence +, -. the minimum value of IF sensor is 0 on the real car.
                             if ((distanceOld > 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) <= 0)) {
                                 // Found sequence +, -.find start of gap
                                     
                                 stageMeasuring = 2;
                                 
-                                 //get start of path data from WHEEL_ENCODER
+                                 //get start of traveledpath data from WHEEL_ENCODER
                                 absPathStart = vd.getAbsTraveledPath();
                             }
                              //update current value from IFR sensor
@@ -182,13 +182,13 @@ namespace automotive {
                     break;
                     case 2:
                         {
-                            // Checking for sequence -, +. on the real car distanceold equal or bigger  0,
-                               //IF sensor finds obstacle value bigger than 0.
+                            // Checking for sequence -, +. 
+                               //the minimum value of IF sensor is 0 on the real car.
                             if ((distanceOld <= 0) && (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > 0)) {
                                 // Found sequence -, +.// find end of gap  
                                 stageMeasuring = 1;
                                  
-                                              // get end of path data from WHEEL_ENCODER
+                                              // get end of traveledpath data from WHEEL_ENCODER
                                 absPathEnd = vd.getAbsTraveledPath();
                               
 
