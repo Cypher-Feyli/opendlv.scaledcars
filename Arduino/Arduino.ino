@@ -1,26 +1,20 @@
-String incomingByte = "";   // for incoming serial data
-
-int inData[10];  // Allocate some space for the Bytes
-byte inByte;   // Where to store the Bytes read
-
+//Included Libraries
+#include <Servo.h>
+#include <Wire.h>
+#include <Smartcar.h>
+#include "RunningMedian.h"
 #include <Adafruit_NeoPixel.h>
  
 #define PIN 10
 #define N_LEDS 16
  
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
- 
-//Included Libraries
-#include <Servo.h>
-#include <Wire.h>
-#include <Smartcar.h>
-#include "RunningMedian.h"
 
-RunningMedian IRB = RunningMedian(3);
-RunningMedian IRBR = RunningMedian(3);
-RunningMedian IRFR = RunningMedian(3);
-RunningMedian USFR = RunningMedian(3);
-RunningMedian USFC = RunningMedian(3);
+RunningMedian IRB = RunningMedian(5);
+RunningMedian IRBR = RunningMedian(5);
+RunningMedian IRFR = RunningMedian(5);
+RunningMedian USFR = RunningMedian(5);
+RunningMedian USFC = RunningMedian(5);
 
 String FrontRightIR = "";
 String BackIR = "";
@@ -29,13 +23,13 @@ String usFront = "";
 String usFrontRight = "";
 
 long counter = 0;
-
+int reading = 0;
 String traveledDistance = "";
 
 const unsigned short GAIN =  0x09; //maximum gain
 const unsigned short RANGE =  0x8C; //7 for 34 centimeters
-SRF08 front;
-SRF08 frontRight;
+SR04 front;
+SR04 frontRight;
 GP2D120 FrontRight;
 GP2D120 BackRight;
 GP2D120 Back;
@@ -82,8 +76,8 @@ void setup()
   BackRight.attach(A4);
   Back.attach(A3);
   
-  /*front.attach(0x71);
-  front.setGain(0);
+  //front.attach(12,13);
+  /*front.setGain(0);
   front.setRange(23);
   front.setPingDelay(200); 
 
@@ -103,6 +97,7 @@ void setup()
   strip.begin();
   //While the handshake is running the middle LEDs (3,4) turns blue.
   handshakeLights(strip.Color(0,0,255));
+  Wire.begin();                // join i2c bus (address optional for master)
 
   while (!Serial) {
    ; // wait for serial port to connect. Needed for native USB port only
@@ -124,6 +119,7 @@ void loop()
     stringComplete = false;
     }
     NormalizeSensValues();
+
   }
   else {
     b = true;
@@ -144,11 +140,11 @@ void handleInput() { //handle serial input if there is any
   if(angle > 20){
 
   //Two statements to sort out incorrect angles which cannot be executed if not changed.
-  if(angle < 60){
-    angle = 60;
+  if(angle < 55){
+    angle = 55;
   }
-  else if( angle > 101){
-    angle = 101;
+  else if( angle > 140){
+    angle = 140;
   }
 
   //Depending on the angle of the steering and the direction that the car is moving the NeoPixels will be drawn with different colors
@@ -315,35 +311,82 @@ void NormalizeSensValues() {
   IRBR.add(float(Back.getDistance()));
   IRB.add(float(BackRight.getDistance()));
   //USFR.add(frontRight.getDistance());
-  //USFC.add(front.getDistance());
+  USFC.add(float(ReadSensor()));
   traveledDistance = String((encoder.getDistance()*4.2)); 
   Serial.println("[V." + traveledDistance + "]");
   counter++;
-  if(counter == 3){
+  if(counter == 5){
   
   FrontRightIR = String(IRFR.getMedian());
   BackIR = String(IRBR.getMedian());
   BackRightIR = String(IRB.getMedian());
   //usFrontRight = String(USFR.getMedian());
-  //usFront = String(USFC.getMedian());
+  usFront = String(USFC.getMedian());
   IRFR.clear();
   IRBR.clear();
   IRB.clear();
-  //USFC.clear();
+  USFC.clear();
   //USFR.clear();
   //get distance traveled since begin() in setup()
 
   //Serial.println("[IR.22,44;66]"); This is for testing purposes
 
   Serial.println("[IR." + FrontRightIR + "," + BackIR + ";" + BackRightIR +"]");
-  Serial.println("[US.100]"); 
+  //Serial.println("[US.100]"); 
   // Printing ultrasonic as 100 every time because we dont have functioning ultrasonic at the moment.
-  //Serial.println("[US." + usFrontRight + "]");
+  Serial.println("[US." + usFront + "]");
   counter = 0;
 
  }
 }
 
+void setGain(unsigned short gainValue){
+    Wire.beginTransmission(0x70); //start i2c transmission
+    Wire.write(0x01); //write to GAIN register (1)
+    Wire.write(constrain(gainValue,0,31)); //write the value
+    Wire.endTransmission(); //end transmission
+}
+
+void setRange(unsigned short rangeValue){
+    Wire.beginTransmission(0x70); //start i2c transmission
+    Wire.write(0x02); //write to range register (1)
+    Wire.write(rangeValue); //write the value -> Max_Range = (rangeValue * 3.4) + 3.4 in centimeters
+    Wire.endTransmission(); //end transmission
+}
+
+//https://www.arduino.cc/en/Tutorial/SFRRangerReader
+int ReadSensor(){
+  setGain(0);
+  setRange(23);
+   // step 1: instruct sensor to read echoes
+  Wire.beginTransmission(112); // transmit to device #112 (0x70)
+  // the address specified in the datasheet is 224 (0xE0)
+  // but i2c adressing uses the high 7 bits so it's 112
+  Wire.write(byte(0x00));      // sets register pointer to the command register (0x00)
+  Wire.write(byte(0x51));      // command sensor to measure in "inches" (0x50)
+  // use 0x51 for centimeters
+  // use 0x52 for ping microseconds
+  Wire.endTransmission();      // stop transmitting
+
+  // step 2: wait for readings to happen
+  delay(20);                   // datasheet suggests at least 65 milliseconds
+
+  // step 3: instruct sensor to return a particular echo reading
+  Wire.beginTransmission(112); // transmit to device #112
+  Wire.write(byte(0x02));      // sets register pointer to echo #1 register (0x02)
+  Wire.endTransmission();      // stop transmitting
+
+  // step 4: request reading from sensor
+  Wire.requestFrom(112, 2);    // request 2 bytes from slave device #112
+
+  // step 5: receive reading from sensor
+  if (2 <= Wire.available()) { // if two bytes were received
+    reading = Wire.read();  // receive high byte (overwrites previous reading)
+    reading = reading << 8;    // shift high byte to be high 8 bits
+    reading |= Wire.read(); // receive low byte as lower 8 bits
+  }
+    return reading;
+}
 //Functions for drawing the LEDs on the car to the color which is inputed when calling the functions.
 //Draws the middle LEDs.
 static void directionLights(uint32_t c) {
