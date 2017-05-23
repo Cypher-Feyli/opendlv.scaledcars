@@ -123,7 +123,7 @@ namespace automotive {
                     vc.setSteeringWheelAngle(-0.436332313);
                     stageMoving++;
                  
-                        // If INFRARED_REAR_CENTER smaller than 13 cm ,switch to next stagemoving.
+                        // If INFRARED_REAR_CENTER less than 13 cm ,switch to next stagemoving.
                       if (back < 13) {
                      
                    stageMoving =80;
