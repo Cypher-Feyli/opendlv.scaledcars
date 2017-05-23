@@ -185,7 +185,7 @@ namespace automotive {
                             // Checking for sequence -, +.
                             if ((distanceOld < 0) && (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) > 0)) {
                                 // Found sequence -, +.
-                                // find end of gap  ,Distanceolad value in sim small than 0.(-1)
+                                // find end of gap  ,Distanceolad value in sim less than 0.(-1)
                                 stageMeasuring = 1;
                                 
                                              //WHEEL_ENCODER 
