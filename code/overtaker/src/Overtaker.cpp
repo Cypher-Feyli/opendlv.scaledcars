@@ -55,12 +55,12 @@ namespace automotive {
         // This method will do the main data processing job.
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body() {
             const int32_t ULTRASONIC_FRONT_CENTER = 3;
-            const int32_t ULTRASONIC_FRONT_RIGHT = 4;
+           // const int32_t ULTRASONIC_FRONT_RIGHT = 4;
             const int32_t INFRARED_FRONT_RIGHT = 0;
             const int32_t INFRARED_REAR_RIGHT = 2;
 
-            const double OVERTAKING_DISTANCE = 45;
-            const double HEADING_PARALLEL = 2;
+            const double OVERTAKING_DISTANCE = 60;
+            const double HEADING_PARALLEL = 8;
 
             // Overall state machines for moving and measuring.
             enum StateMachineMoving { FORWARD, TO_LEFT_LANE_LEFT_TURN, TO_LEFT_LANE_RIGHT_TURN, CONTINUE_ON_LEFT_LANE, TO_RIGHT_LANE_RIGHT_TURN, TO_RIGHT_LANE_LEFT_TURN };
@@ -88,7 +88,9 @@ namespace automotive {
 
                 // Create vehicle control data.
                 VehicleControl vc;
-
+                if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE && sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) >0 ) {
+                cerr << " QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+                }
                 // Moving state machine.
                 if (stageMoving == FORWARD) {
                     vc.setSpeed(1);
@@ -98,9 +100,16 @@ namespace automotive {
                         stageToRightLaneRightTurn = 0;
                     }
                     else if (stageMoving == TO_LEFT_LANE_LEFT_TURN) {
-                        // Move to the left lane: Turn left part until both IRs see something.
+                                        cerr << "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL" << endl;
+
+                      
+                      // Move to the left lane: Turn left part until both IRs see something.
                         vc.setSpeed(1);
-                        vc.setSteeringWheelAngle(-0.52);
+                        vc.setSteeringWheelAngle(-0.70);
+                        Container c(vc);
+                                          // Send container.
+                        getConference().send(c);
+                                          //
                         cout << "TO_LEFT_LANE_LEFT_TURN    "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
 
                         // State machine measuring: Both IRs need to see something before leaving this moving state.
@@ -111,9 +120,12 @@ namespace automotive {
                     else if (stageMoving == TO_LEFT_LANE_RIGHT_TURN) {
                         // Move to the left lane: Turn right part until both IRs have the same distance to obstacle.
                         vc.setSpeed(.6);
-                        vc.setSteeringWheelAngle(0.52);
+                        vc.setSteeringWheelAngle(0.75);
                         cout << "TO_LEFT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
-
+                        Container c(vc);
+                                          // Send container.
+                         getConference().send(c);
+                                          //                   
                         // State machine measuring: Both IRs need to have the same distance before leaving this moving state.
                         stageMeasuring = HAVE_BOTH_IR_SAME_DISTANCE;
 
@@ -121,19 +133,29 @@ namespace automotive {
                     }
                     else if (stageMoving == CONTINUE_ON_LEFT_LANE) {
                         // Move to the left lane: Passing stage.
+                        vc.setSteeringWheelAngle(0.11);
+			vc.setSpeed(1.3);
 
                         // Use m_vehicleControl data from image processing.
-                    	cout << "CONTINUE_ON_LEFT_LANE      " << stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
+                    	  Container c(vc);
+                                          // Send container.
+                         getConference().send(c);
+                                          //                   
+                        cout << "CONTINUE_ON_LEFT_LANE      " << stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn<< endl;
                         // Find end of object.
                         stageMeasuring = END_OF_OBJECT;
                     }
                     else if (stageMoving == TO_RIGHT_LANE_RIGHT_TURN) {
                         // Move to the right lane: Turn right part.
                         vc.setSpeed(1.3);
-                        vc.setSteeringWheelAngle(0.17);
+                        vc.setSteeringWheelAngle(0.60);
+                        Container c(vc);
+                        
+                        getConference().send(c);
+                                          //
                         cout << "TO_RIGHT_LANE_RIGHT_TURN       "<< stageToRightLaneRightTurn<<" ->right    left <- "<< stageToRightLaneLeftTurn << endl;
                         stageToRightLaneRightTurn--;
-                        if (stageToRightLaneRightTurn == -13) {
+                        if (stageToRightLaneRightTurn == 5) {
                             stageMoving = TO_RIGHT_LANE_LEFT_TURN;
                         }
                     }
@@ -144,9 +166,12 @@ namespace automotive {
                         
                         vc.setSpeed(2);
                         vc.setSteeringWheelAngle(-0.52);
-                     
-                        stageToRightLaneLeftTurn = 0;
-                        if (stageToRightLaneLeftTurn == 0) {
+                     Container c(vc);
+                                       // Send container.
+                    getConference().send(c);
+                                       //
+                        stageToRightLaneLeftTurn--;
+                        if (stageToRightLaneLeftTurn == 10) {
                             // Start over.
                             stageMoving = FORWARD;
                             stageMeasuring = FIND_OBJECT_INIT;
@@ -156,9 +181,11 @@ namespace automotive {
 
                         }
                     }
-
+                    if(stageMeasuring == DISABLE){
+                      cerr << "Passing through" << endl;
+                    }
                     // Measuring state machine.
-                    if (stageMeasuring == FIND_OBJECT_INIT) {
+                    else if (stageMeasuring == FIND_OBJECT_INIT) {
                         distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
                         stageMeasuring = FIND_OBJECT;
                     }
@@ -174,9 +201,8 @@ namespace automotive {
                         distanceToObstacleOld = distanceToObstacle;
                     }
                     else if (stageMeasuring == FIND_OBJECT_PLAUSIBLE) {
-                        if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE) {
+                        if (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) < OVERTAKING_DISTANCE && sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER) >0 ) {
                             stageMoving = TO_LEFT_LANE_LEFT_TURN;
-
                             // Disable measuring until requested from moving state machine again.
                             stageMeasuring = DISABLE;
                         }
@@ -222,7 +248,6 @@ namespace automotive {
                 // Send container.
                 getConference().send(c);
             }
-
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
         }
 

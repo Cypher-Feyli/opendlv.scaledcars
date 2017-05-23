@@ -112,12 +112,12 @@ void loop()
 void handleInput() { //handle serial input if there is any
   if (b) {
     CarMotor.writeMicroseconds(1500);
-    myServo.write(90);
+    myServo.write(81);
     b = false;
   }
   //the two delimiters
-  posofstart = inputString.indexOf("[");
-  posofend = inputString.indexOf("]");
+  posofstart = inputString.lastIndexOf("[");
+  posofend = inputString.lastIndexOf("]");
   inputString.substring(posofstart + 1, posofstart + 2).toCharArray(dir, 2);
   angle = SetAngle(posofstart, posofend);
   //Due to a issue when getting one value only we filter it out
