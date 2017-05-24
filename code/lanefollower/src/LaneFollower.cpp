@@ -150,11 +150,11 @@ namespace automotive {
             return retVal;
         }
     //inspired partially by http://opencvexamples.blogspot.com/2013/10/line-detection-by-hough-line-transform.html
+     //This method returns true if a horizontal line exist
     bool LaneFollower::intersectionDetector(Mat mat){
         bool detected = false;
           vector<Vec2f> lines;
            // detect lines
-          cerr << "stooooooooooooooooooooooopppppppp"  << endl;
             HoughLines(mat, lines, 1, CV_PI/180, 150, 0, 0 );
          
             // draw lines
@@ -173,7 +173,8 @@ namespace automotive {
        
         void LaneFollower::processImage() {
              //canny edge detection(http://docs.opencv.org/2.4/modules/imgproc/doc/feature_detection.html?highlight=canny)
-            
+            /* Here we create three mat variable the mat unprocessed will take the m_image from the sharedImage
+            the mat gray for the grayscaled image and canny_image for the canny*/
             Mat unprocessed(m_image),gray, canny_image;
             Rect cropArea(0, 288, 640, 192); 
             Mat croppedImage = unprocessed(cropArea);
@@ -182,18 +183,15 @@ namespace automotive {
             
            
             double e = 0;
-            if (stopline==false){
-             stopped = 0;
-        }
-
+          
             const int32_t CONTROL_SCANLINE = 174; 
             const int32_t distance = 250;
-             int xLeft = 0;
+            int xLeft = 0;
             int xRight = 0;
 
 
             TimeStamp beforeImageProcessing;
-           // this loop first goes through the bottom of the image - 8 and ends at imageheight 0.
+           // this loop first goes through the bottom of the image - 8 and ends at imageheight 40.
             // starting the loop with the integer 184 and continue the loop as long as
             // y is bigger than 0, y decreases with 10 every loop
             for(int32_t y = 184; y > 40; y -= 10) {
@@ -204,14 +202,10 @@ namespace automotive {
                 }else{
                     xLeft = (m_image->width/2)-4;
                     xRight = (m_image->width/2)+4;
-
                 }
 
                 // Search from middle to the left:
-                // cvscalar is an array that stores integers representing for example the color [210,0,0] red
-                //CvScalar pixelLeft;
                 uchar pixelLeft;
-               // CvPoint left;
                 Point left;
                 left.y = y;
                 left.x = -1;
@@ -220,7 +214,6 @@ namespace automotive {
                     //http://answers.opencv.org/question/1870/find-pixel-color-out-of-cvmat-on-specific-position/
                   // here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
                     pixelLeft = canny_image.at<uchar>(Point(x, y));
-                   // pixelLeft = cvGet2D(newImage, y, x);
                    // when finding a non black pixel, break the loop and store the x value which is the vertical pixel location 
                      if (pixelLeft > 177)  {
                         left.x = x;
@@ -229,9 +222,7 @@ namespace automotive {
                 }
 
                 // Search from middle to the right:
-               // CvScalar pixelRight;
                 uchar pixelRight;
-               // CvPoint right;
                 Point right;
                 right.y = y;
                 right.x = -1;
@@ -242,39 +233,29 @@ namespace automotive {
                         break;
                     }
                 }
+             
+               //If a white pixel is found in the center of the image and the car is not in a stopline
+              //we check if there is a intersection.
                 if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x>(m_image->width/2)-3&&left.x>-1))&& (!stopline) ){
                     if(intersectionDetector(canny_image) == true){
                         stopline = true;
                         cerr << "stooooooooooooooooooooooopppppppp"  << endl;
                         stopped = 100;
-
                     }
                 }
 
                 if (m_debug) {
                     if (left.x > 0) {
-                      //  CvScalar green = CV_RGB(0, 255, 0);
-                     //   cvLine(m_image, cvPoint(m_image->width/2, y), left, green, 1, 8);
-                        // grayscaled image so have to make the lines white
+                        //put lines on the image from the middle of the image to where the white pixels are found 
                         Scalar green = CV_RGB(0, 255, 0);
 
                         line(croppedImage, Point(m_image->width/2, y), left, green);
 
-                      //  stringstream sstr;
-                      //  sstr << (m_image->width/2 - left.x);
-                      //  cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 - 100, y - 2), &m_font, green);
                     }
                     if (right.x > 0) {
-                       // CvScalar red = CV_RGB(255, 0, 0);
-                     //   cvLine(m_image, cvPoint(m_image->width/2, y), right, red, 1, 8);
-
                         Scalar red = CV_RGB(255, 0, 0);
 
                         line(croppedImage, Point(m_image->width/2, y), right, red);
-
-                      //  stringstream sstr;
-                      //  sstr << (right.x - m_image->width/2);
-                      //  cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width/2 + 100, y - 2), &m_font, red);
                     }
                 }
 
@@ -285,8 +266,9 @@ namespace automotive {
                         if (!useRightLaneMarking) {
                             m_eSum = 0;
                             m_eOld = 0;
-                        }
-
+                        } 
+                     
+                       // cross track error calculation
                         e = ((right.x - m_image->width/2.0) - distance)/distance;
 
                         useRightLaneMarking = true;
@@ -335,7 +317,7 @@ namespace automotive {
 //            const double Ki = 8.5;
 //            const double Kd = 0;
 
-            // The following values have been determined by Twiddle algorithm.
+            // The following values have been determined by experience from students of GU university.
             const double Kp = 1.30;
             const double Ki = 0.01;
             const double Kd = 0.1;
@@ -350,7 +332,8 @@ namespace automotive {
             double desiredSteering = 0;
             if (fabs(e) > 1e-2) {
                 desiredSteering = y;
-
+             
+             //0.52radians is approximately 30degrees which is the maximum angle of the real car
                 if (desiredSteering > 0.52) {
                     desiredSteering = 0.52;
                 }
@@ -361,23 +344,26 @@ namespace automotive {
            cerr << "PID: " << "e = " << e << ", eSum = " << m_eSum << ", desiredSteering = " << desiredSteering << ", y = " << y << endl;
 
 
-            // Go forward.
+            // the states of the car depending on if a stopline is detected
+         
+          //stopped
            if(stopline == true && stopped >0){
-
             m_vehicleControl.setSpeed(0);
             stopped--;
             cerr << stopped  << endl;
             forwa = 50;
            }
+         
+          //moving forward to pass the intersection
            else if(stopline == true && forwa >0){
              m_vehicleControl.setSpeed(1);
             // adjusting the angle for the real car
              m_vehicleControl.setSteeringWheelAngle(-0.18);
              cerr << forwa << endl;
-             forwa--;
-
-           }else{
-
+             forwa--; 
+           }
+            //lanefollowing state
+          else{
             stopline=false;
             m_vehicleControl.setSpeed(2);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);
