@@ -33,8 +33,7 @@
 
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-#include <cmath>
-
+ #include <cmath>
 
 
 
@@ -71,7 +70,9 @@ namespace automotive {
         double distanceToObstacle = 0;
         double distanceToObstacleOld = 0;
         static bool useRightLaneMarking = true;
-
+        int stopped = 0;
+         bool stopline = false;
+         int forwa =0;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
             m_hasAttachedToSharedImageMemory(false),
