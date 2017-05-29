@@ -70,9 +70,10 @@ namespace automotive {
         double distanceToObstacle = 0;
         double distanceToObstacleOld = 0;
         static bool useRightLaneMarking = true;
+        // Intersection variables 
         int stopped = 0;
-         bool stopline = false;
-         int forwa =0;
+        bool stopline = false;
+        int forwa =0;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "lanefollower"),
             m_hasAttachedToSharedImageMemory(false),
@@ -147,8 +148,8 @@ namespace automotive {
             }
             return retVal;
         }
-    //inspired partially by http://opencvexamples.blogspot.com/2013/10/line-detection-by-hough-line-transform.html
-     //This method returns true if a horizontal line exist
+    // Inspired partially by http://opencvexamples.blogspot.com/2013/10/line-detection-by-hough-line-transform.html
+    // This method returns true if a horizontal line exist
     bool LaneFollower::intersectionDetector(Mat mat){
         bool detected = false;
           vector<Vec2f> lines;
@@ -191,7 +192,7 @@ namespace automotive {
             TimeStamp beforeImageProcessing;
            // this loop first goes through the bottom of the image - 8 and ends at imageheight 40.
             // starting the loop with the integer 184 and continue the loop as long as
-            // y is bigger than 0, y decreases with 10 every loop
+            // y is bigger than 40, y decreases with 10 every loop
             for(int32_t y = 184; y > 40; y -= 10) {
                 
                 if(y==174){
@@ -209,10 +210,10 @@ namespace automotive {
                 left.x = -1;
                   for(int x = (m_image->width/2); x > xLeft; x--) {
 
-                    //http://answers.opencv.org/question/1870/find-pixel-color-out-of-cvmat-on-specific-position/
-                  // here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
+                    // http://answers.opencv.org/question/1870/find-pixel-color-out-of-cvmat-on-specific-position/
+                    // Here we get the pixel value at location y,x in the mat canny_image 0 is black and 255 is white
                     pixelLeft = canny_image.at<uchar>(Point(x, y));
-                   // when finding a non black pixel, break the loop and store the x value which is the vertical pixel location 
+                   // When finding a non black pixel, break the loop and store the x value which is the horizontal pixel location 
                      if (pixelLeft > 177)  {
                         left.x = x;
                         break;
@@ -232,8 +233,8 @@ namespace automotive {
                     }
                 }
              
-               //If a white pixel is found in the center of the image and the car is not in a stopline
-              //we check if there is a intersection.
+               /*If a white pixel is found in the center of the image and the car is not in a stopline
+                 we check if there is a intersection.*/
                 if(((right.x<3+(m_image->width/2)&&right.x>-1) || (left.x>(m_image->width/2)-3&&left.x>-1))&& (!stopline) ){
                     if(intersectionDetector(canny_image) == true){
                         stopline = true;
@@ -326,8 +327,8 @@ namespace automotive {
             m_eOld = e;
 
             const double y = p + i + d;
-          //  cerr << "y" << y << endl;
             double desiredSteering = 0;
+         
             if (fabs(e) > 1e-2) {
                 desiredSteering = y;
              
