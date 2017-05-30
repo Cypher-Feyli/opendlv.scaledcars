@@ -103,7 +103,7 @@ namespace automotive {
                 }
                 if ((stageMoving >= 10) && (stageMoving < 15)) {
                     cerr << "===========PARKING============" << endl;
-                    // Stop.find the parking gap
+                    // Stop.
                     vc.setSpeed(0);
                     vc.setSteeringWheelAngle(0);
                     stageMoving++;
