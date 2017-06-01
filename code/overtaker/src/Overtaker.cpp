@@ -198,6 +198,8 @@ namespace automotive {
                         distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
 
                         // Approaching an obstacle (stationary or driving slower than us).
+			// It checks the updated data we are receiving from Sensor and dont care about if the obstacle is moving faster or slower than 
+			// the car any way it goes to the next stage which Find_Object_Plusable.
                         if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
                             // Check if overtaking shall be started.                        
                             stageMeasuring = FIND_OBJECT_PLAUSIBLE;
