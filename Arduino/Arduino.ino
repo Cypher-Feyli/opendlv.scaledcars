@@ -62,7 +62,7 @@ int posofend;
 int pi = 3.14159265359;
 Servo myServo, CarMotor;  //Steering Servo
 
-// the setup routine runs once when you press reset:
+//The setup routine runs once when you press reset button on the arduino board
 void setup()
 {
   pinMode(ChannelA , INPUT);
@@ -86,12 +86,12 @@ void setup()
     ; // wait for serial port to connect. Needed for native USB port only
   }
   establishContact();
-  encoder.begin(); // begin measurement HERE
+  encoder.begin(); // Begin measurements here
 }
 //Main Program
 void loop()
 {
-  //pulsing in the
+  //Pulsing in the
   int pulse = pulseIn(ChannelB, HIGH, 35000);
   if (pulse < 700) {
     a = true;
@@ -109,27 +109,27 @@ void loop()
   }
 }
 
-void handleInput() { //handle serial input if there is any
+void handleInput() { //Handle serial input if there is any
   if (b) {
     CarMotor.writeMicroseconds(1500);
     myServo.write(81);
     b = false;
   }
-  //the two delimiters
+  //The two delimiters
   posofstart = inputString.lastIndexOf("[");
   posofend = inputString.lastIndexOf("]");
   inputString.substring(posofstart + 1, posofstart + 2).toCharArray(dir, 2);
   angle = SetAngle(posofstart, posofend);
-  //Due to a issue when getting one value only we filter it out
-  //did not happen often and did not affect in any major way but better to do it like this
+  //Due to an issue when getting only one value we filter it out
+  //Did not happen often and did not affect in any major way but still required a corner case fix
   if (angle > 20) {
     //Two statements to sort out incorrect angles which cannot be executed if not changed.
 
-    //too big angles
+    //If angle is too small
     if (angle < 55) {
       angle = 55;
     }
-    //Not having too big angles
+    //If angle is too big
     else if ( angle > 140) {
       angle = 140;
     }
@@ -154,26 +154,26 @@ void handleInput() { //handle serial input if there is any
     else if (dir[0] == 'S') {
       directionLights(strip.Color(32, 32, 32));
     }
-    //switch statement with direction
+    //Switch statement with direction
     switch (dir[0]) {
-      case 'F': //rotate counter-clockwise going forward
-        CarMotor.writeMicroseconds(1552);
+      case 'F': //Forward
+        CarMotor.writeMicroseconds(1554);
         myServo.write(angle);
         break;
-      case 'K': //rotate counter-clockwise going forward
+      case 'K': //Forward slowly
         CarMotor.writeMicroseconds(1553);
         myServo.write(angle);
         break;
-      case 'S'://stop car
+      case 'S'://Stop 
         myServo.write(angle);
         CarMotor.writeMicroseconds(1500);
         break;
-      case 'B': //turn clock-wise
+      case 'B': //Backwards slowly
         CarMotor.writeMicroseconds(1245);
         myServo.write(angle);
         break;
-      default:
-        myServo.write(90);
+      default: //Stop and set angle to straight forward
+        myServo.write(81);
         CarMotor.writeMicroseconds(1500);
         break;
 
@@ -213,7 +213,7 @@ void SteerCar() {
   int ch[2];
   if (a) {
     CarMotor.writeMicroseconds(1500);
-    myServo.write(90);
+    myServo.write(81);
     a = false;
   }
   ch[1] = pulseIn(ChannelA, HIGH);
