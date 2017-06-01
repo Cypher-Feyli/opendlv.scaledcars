@@ -85,6 +85,8 @@ namespace automotive {
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+		    //3cm to 6m is range for our US
+		//5-25 cm is range for IR's
 
                 // Create vehicle control data.
                 VehicleControl vc;
