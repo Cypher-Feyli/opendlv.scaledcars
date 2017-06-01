@@ -187,6 +187,9 @@ namespace automotive {
                       cerr << "Passing through" << endl;
                     }
                     // Measuring state machine.
+		    // Find_object_inite and find_object are using here to always keep us updated about the situation of the obstacl in the street 
+			// And both of them are trying to prepare the car for overtaking
+			// With help of them we can get how far the car is from the obstacle.
                     else if (stageMeasuring == FIND_OBJECT_INIT) {
                         distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
                         stageMeasuring = FIND_OBJECT;
