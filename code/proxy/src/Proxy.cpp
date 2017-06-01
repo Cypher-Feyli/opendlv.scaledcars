@@ -147,6 +147,7 @@ namespace automotive {
             //Uses open da vincis library http://opendavinci.cse.chalmers.se/api/classodcore_1_1wrapper_1_1SerialPort.html
             std::shared_ptr<SerialPort> serial(SerialPortFactory::createSerialPort(SERIAL_PORT, BAUD_RATE));
             DataParser handler;
+            //set stringlistener to the handler
             serial->setStringListener(&handler);
 
             // Start receiving bytes.
@@ -171,9 +172,10 @@ namespace automotive {
                 //Waiting till handshake is done between the odroid and the arduino
                 while(!handler.Handshake()){
                     cerr << "initializing handshake" << endl;
+                    //wait inbetween a bit
                     odcore::base::Thread::usleepFor(10 * TENTH_SECOND);
                 };
-                uint32_t sensors=0;
+                uint32_t sensors=4; //we have only 4 sensors
                 //Just making sure each sensor had time to setup on the arduino
                 if(captureCounter > 100){
                     if(handler.DataDoneSBD()){  
@@ -182,18 +184,21 @@ namespace automotive {
                         for (const auto &p : m) {
                             std::cout << "m[" << p.first << "] = " << p.second << '\n';
                         }
+                        //Make a sensorboarddata with 4 sensors and get the Sensorboardata map 
                         SensorBoardData sbd(sensors, handler.GetValuesSBD());
+                        //make a container with sbd
                         Container csbd(sbd);
-                        getConference().send(csbd);
-                        handler.ResetSBD();
+                        getConference().send(csbd); // send the container
+                        handler.ResetSBD(); //reset and wait for new data
                     }
+                    //Check if all the vehicledata is done
                     if(handler.DataDoneVD()){
-                        cerr << handler.GetValuesVD() << endl;
-                        VehicleData vehicleData; 
-                        vehicleData.setAbsTraveledPath(handler.GetValuesVD());
-                        Container cvd(vehicleData);
-                        getConference().send(cvd);
-                        handler.ResetVD();
+                        cerr << handler.GetValuesVD() << endl; // print proxy
+                        VehicleData vehicleData; // vehicledata
+                        vehicleData.setAbsTraveledPath(handler.GetValuesVD()); // get the odometer distance
+                        Container cvd(vehicleData); // make a container add the odometer data 
+                        getConference().send(cvd); // send it
+                        handler.ResetVD(); // reset it and wait for new vehicledata
                     }
                     //odcore::base::Thread::usleepFor(100 * HUNDRED_SECOND);
 
@@ -202,22 +207,23 @@ namespace automotive {
 
                     double speed = vehicleControlData.getSpeed(); 
                     double Angle = vehicleControlData.getSteeringWheelAngle();
-                    int speed1 = (int) speed;
+                    int speed1 = (int) speed; // Cast Speed to int
                     //since the car axis is not straight at angle 90 we adjusted this to 81.
                     int Angle1 = (int) 81  + (Angle * (180 / 3.1415926535)); // Cast angle to int
-                    cerr << "Angle is: "<<Angle1 << endl;
-                    cerr << "direction is: " << speed1 << endl;
-                    std::string angleString = std::to_string(Angle1);
-                    if(speed1 >= 1){ 
+                    cerr << "Angle is: "<<Angle1 << endl; // Print angle we are sending
+                    cerr << "direction is: " << speed1 << endl; // Print speed which is direction aswell
+                    std::string angleString = std::to_string(Angle1);  //angle to string
+                    //These if statements divide speed to 4 diffrent parameters which indciate direction and speed
+                    if(speed1 >= 1){ // Speed bigger then 1 we send forward
                         serial->send("[F" + angleString + "]");
                     }
-                    if(speed < 1 && speed > 0){
+                    if(speed < 1 && speed > 0){ // speed elss then one but bigger then 0 send slow speed
                         serial->send("[K" + angleString + "]");
                     }
-                    else if(speed1 == 0){
+                    else if(speed1 == 0){//speed is 0 which is stop
                         serial->send("[S" + angleString + "]");
                     }
-                    else if(speed1 < 0){
+                    else if(speed1 < 0){//Speed is less than 0 sends backawrds
                         serial->send("[B" + angleString + "]");
                     }
                 }
