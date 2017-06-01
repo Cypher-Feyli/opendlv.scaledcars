@@ -108,6 +108,7 @@ namespace automotive {
                       // Move to the left lane: Turn left part until both IRs see something.
                         vc.setSpeed(1);
                         vc.setSteeringWheelAngle(-0.70);
+			    //Create container vc 
                         Container c(vc);
                                           // Send container.
                         getConference().send(c);
