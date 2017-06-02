@@ -85,6 +85,8 @@ namespace automotive {
                 // 2. Get most recent sensor board data:
                 Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+		    //3cm to 6m is range for our US
+		//5-25 cm is range for IR's
 
                 // Create vehicle control data.
                 VehicleControl vc;
@@ -106,6 +108,7 @@ namespace automotive {
                       // Move to the left lane: Turn left part until both IRs see something.
                         vc.setSpeed(1);
                         vc.setSteeringWheelAngle(-0.70);
+			    //Create container vc 
                         Container c(vc);
                                           // Send container.
                         getConference().send(c);
@@ -185,6 +188,9 @@ namespace automotive {
                       cerr << "Passing through" << endl;
                     }
                     // Measuring state machine.
+		    // Find_object_inite and find_object are using here to always keep us updated about the situation of the obstacl in the street 
+			// And both of them are trying to prepare the car for overtaking
+			// With help of them we can get how far the car is from the obstacle.
                     else if (stageMeasuring == FIND_OBJECT_INIT) {
                         distanceToObstacleOld = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
                         stageMeasuring = FIND_OBJECT;
@@ -193,6 +199,8 @@ namespace automotive {
                         distanceToObstacle = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_CENTER);
 
                         // Approaching an obstacle (stationary or driving slower than us).
+			// It checks the updated data we are receiving from Sensor and dont care about if the obstacle is moving faster or slower than 
+			// the car any way it goes to the next stage which Find_Object_Plusable.
                         if (  (distanceToObstacle > 0) && (((distanceToObstacleOld - distanceToObstacle) > 0) || (fabs(distanceToObstacleOld - distanceToObstacle) < 1e-2)) ) {
                             // Check if overtaking shall be started.                        
                             stageMeasuring = FIND_OBJECT_PLAUSIBLE;
